@@ -64,6 +64,7 @@ object IxJpegDebug {
                 Log.w(TAG, "Ix returned ${result.files.size} files; keeping upstream bytes")
                 null
             } else {
+                Log.d(TAG, "Ix pass ${engine.version}: ${jpeg.size} -> ${file.bytes.size} bytes")
                 file.bytes
             }
         } catch (t: Throwable) {
