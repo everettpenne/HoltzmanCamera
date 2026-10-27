@@ -31,16 +31,17 @@ New code goes under `app/src/main/java/app/grapheneos/camera/suite/`:
 
 ```
 suite/
-├── capture/     # output format selection, RAW/Ultra HDR save path, file naming, MIME
+├── ix/          # Ix imaging engine: formats, RAW/HDR, colour, styles, metadata
 ├── manual/      # ManualState, sensor ranges, Camera2 interop, auto<->manual transitions
-├── styles/      # StylePreset, colour maths, renderer, EXIF writer
 ├── handoff/     # Sietch intent, FileProvider URIs, MediaStore/SAF helpers
 └── uno/         # deep links, shortcut routing, Live Update
 ```
 
+**Ix** is the engine that owns the image: bytes in, files and warnings out. Its contract and internal layout are in [ix.md](ix.md). It has no `Context`, `Uri` or UI types; the app decides where the bytes go.
+
 Plus new resources (`res/values/suite_colors.xml`, `suite_themes.xml`, `suite_strings.xml`, `res/layout/suite_*.xml`, `res/font/inter_variable.ttf`) and a `user` source-set overlay for the build without system-camera intents.
 
-**Do not add a Gradle module in v1.** A `:pipeline` module only makes sense when the style/LUT work needs native code. Keeping v1 in `:app` avoids touching `settings.gradle.kts` and keeps the upstream build mergeable.
+**Do not add a Gradle module in v1.** A `:ix` module only makes sense when the engine needs native code or a second consumer. Keeping v1 in `:app` avoids touching `settings.gradle.kts` and keeps the upstream build mergeable.
 
 ## 3. Capture pipeline
 
@@ -49,12 +50,13 @@ Plus new resources (`res/values/suite_colors.xml`, `suite_themes.xml`, `suite_st
 ```
 CameraX bind (Preview + ImageCapture [+ VideoCapture])
   → ImageCapture (JPEG)
-  → ImageSaver (JPEG/YUV)
-  → MediaStore (DCIM/…) or SAF tree
+  → [Ix style/format stage, when enabled]
+  → IxResult (bytes + metadata)
+  → ImageSaver / handoff (MediaStore or SAF)
   → thumbnail / last-shot preview
 ```
 
-The fork leaves this path alone except for the output-format switch and the optional post-save style step.
+With no style and JPEG output, this is upstream's path untouched. Ix only enters when the user selects a style, RAW, Ultra HDR or another output format.
 
 ### Manual
 
@@ -66,7 +68,8 @@ Manual panel (sliders + Auto)
         CONTROL_AWB_MODE_OFF, COLOR_CORRECTION_GAINS,
         CONTROL_AF_MODE_OFF, LENS_FOCUS_DISTANCE)
   → CameraX ImageCapture (JPEG)
-  → ImageSaver
+  → Ix (if a style/format is requested)
+  → handoff / ImageSaver
 ```
 
 Rules:
@@ -83,7 +86,9 @@ Rules:
 ```
 ImageCapture.Builder().setOutputFormat(OUTPUT_FORMAT_RAW or OUTPUT_FORMAT_RAW_JPEG)
   → ImageProxy (verify format)
-  → RawSaver (DNG bytes, naming, MediaStore MIME, EXIF/DNG metadata)
+  → Ix RAW path (DNG bytes, naming, MIME, DNG/EXIF metadata)
+  → IxResult
+  → handoff writes MediaStore/SAF
 ```
 
 - DNG is a first-class output, not a JPEG with a different extension. Use the CameraX DNG output if it works; otherwise a `DngCreator` path fed by `RAW_SENSOR` is the fallback.
@@ -95,18 +100,19 @@ ImageCapture.Builder().setOutputFormat(OUTPUT_FORMAT_RAW or OUTPUT_FORMAT_RAW_JP
 
 ```
 ImageCapture.Builder().setOutputFormat(OUTPUT_FORMAT_JPEG_ULTRA_HDR)
-  → ImageSaver (preserve JPEG + gain map bytes)
-  → MediaStore
+  → Ix Ultra HDR path (preserve JPEG + gain map bytes)
+  → IxResult
+  → handoff writes MediaStore/SAF
 ```
 
-- Verify that the gain map survives `ImageSaver`'s JPEG trimming/EXIF handling. If it does not, add a byte-preserving path for Ultra HDR.
+- Verify that the gain map survives `ImageSaver`'s JPEG trimming/EXIF handling. If it does not, Ix supplies a byte-preserving path for Ultra HDR.
 - Ultra HDR requires a capable device/OS; if the format is unsupported, fall back to JPEG with a one-time notice, not a crash.
 - Styles on Ultra HDR are a later problem: v1 styles apply to SDR JPEG. Do not silently drop the gain map when a style is selected.
 
 ### Styles
 
 ```
-JPEG (SDR) → style renderer (ColorMatrix + tone curve) → JPEG
+JPEG (SDR) → Ix style stage (ColorMatrix + tone curve) → JPEG
 ```
 
 - v1: matrix-based looks (Standard/Warm/Cool/Rich/Soft) with a strength slider. This is fast and predictable; it is not a full 3D LUT.

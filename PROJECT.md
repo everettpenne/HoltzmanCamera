@@ -1,10 +1,10 @@
-# Holtzman — project outline
+# Holtzman Camera — project outline
 
-**Working name:** Holtzman. **Package (placeholder):** `com.everettpenne.holtzman`.
+**Product:** Holtzman Camera. **Imaging engine:** Ix. **Package:** `com.everettpenne.holtzman`.
 **Status:** planning. **Base:** GrapheneOS Camera `main` at `0aa4cb0` (2026-10-23, versionCode 94), recorded in [`UPSTREAM`](UPSTREAM).
 **Licence:** MIT, upstream copyright preserved.
 
-> The name and application ID are placeholders. They must be settled before the first public release because an application ID cannot change afterwards without orphaning installed data.
+> The name is chosen: **Holtzman Camera**, with **Ix** as the imaging engine. The application ID is reserved as `com.everettpenne.holtzman`; it can still change before the first public release, but not after — that would orphan installed data. See [the naming decisions](docs/decisions.md).
 
 ---
 
@@ -16,6 +16,8 @@ GrapheneOS Camera is a strong, privacy-first camera, but it is deliberately not 
 2. **Files worth keeping** — RAW/DNG and Ultra HDR alongside JPEG, with the suite's EXIF habits.
 3. **A look of its own** — photographic styles with a strength control, tuned for skin tones.
 4. **A place in the suite** — one-tap handoff to Sietch, Uno shortcuts and surfaces, and the same privacy posture as the other apps.
+
+**Holtzman Camera** is the product; **Ix** is the imaging engine inside it (file formats, colour, styles, and later the computational pipeline). The engine has its own contract in [docs/ix.md](docs/ix.md) so it can grow — burst HDR, Night, portrait — without changing the app's identity or the upstream capture plumbing.
 
 It is a **camera for people who already chose GrapheneOS**, not a Pixel Camera replacement. Google's HDR+/Night Sight/Super Res pipelines are proprietary and sensor-tuned; this app should not promise to match them. Its differentiators are control, file formats, privacy and integration.
 
@@ -58,14 +60,14 @@ Estimates are for one developer, including tests and a device pass. D3/D4/D5 can
 | ID | Deliverable | Scope | Depends on | Done when | Est. |
 | --- | --- | --- | --- | --- | --- |
 | **D0** | **Fork, docs and sync baseline** | Upstream clone, `upstream` remote, `UPSTREAM`, project outline, architecture, upstream runbook, decisions | — | Docs exist; base commit recorded; `git fetch upstream` works | done |
-| **D1** | **Buildable, rebranded fork** | `applicationId`, label, icon, About attribution; Glass token layer (colours, Inter, corners, haptics); remove system-camera intents; CI builds | D0 | `:app:assembleDebug` green; installs beside GrapheneOS Camera; no system intents; About credits upstream | 3–5 d |
+| **D1** | **Buildable, rebranded fork** | `applicationId`, label, icon, About ("Holtzman Camera · Ix engine", upstream credit); Glass token layer (colours, Inter, corners, haptics); remove system-camera intents; CI builds | D0 | `:app:assembleDebug` green; installs beside GrapheneOS Camera; no system intents; About names Ix and credits upstream | 3–5 d |
 | **D2** | **v1 camera core** | Upstream features retained (photo, video, QR, Night where available); 4:3 default; tap focus/meter; volume shutter; MediaStore + SAF save; EXIF strip default; shortcuts and deep links; category/description | D1 | Photo/video save and appear in Gallery/Uno; shortcuts open the right mode; no permission beyond CAMERA (+ optional MIC/location) | 1–2 w |
 | **D3** | **Manual controls** | Shutter, ISO, focus and WB panels; sensor ranges from `CameraCharacteristics`; auto/manual switch; live histogram; ZSL and extensions disabled while manual; restore on exit | D2 | Each control visibly changes the capture; ranges are the device's; auto restores cleanly; JVM tests for range/step logic | 2–3 w |
-| **D4** | **RAW/DNG and Ultra HDR** | `OUTPUT_FORMAT_RAW`/`RAW_JPEG`; DNG save and EXIF; Ultra HDR `OUTPUT_FORMAT_JPEG_ULTRA_HDR` with gain map; graceful fallback when unsupported; storage naming | D2 (parallel with D3) | DNG opens in darktable/RawTherapee; Ultra HDR shows on an HDR display and falls back; files land in MediaStore/SAF correctly | 2–3 w |
-| **D5** | **Photographic styles** | Standard / Warm / Cool / Rich / Soft; strength; post-capture preview; apply to SDR JPEG at save; style name in metadata; RAW untouched; skin-tone-safe tuning | D4 | Post-capture preview matches the saved output; strength works; original recoverable from RAW; no crash on 12 MP | 1–2 w |
+| **D4** | **Ix: RAW/DNG and Ultra HDR** | `OUTPUT_FORMAT_RAW`/`RAW_JPEG`; DNG save and EXIF; Ultra HDR `OUTPUT_FORMAT_JPEG_ULTRA_HDR` with gain map; graceful fallback when unsupported; storage naming | D2 (parallel with D3) | DNG opens in darktable/RawTherapee; Ultra HDR shows on an HDR display and falls back; files land in MediaStore/SAF correctly | 2–3 w |
+| **D5** | **Ix: photographic styles** | Standard / Warm / Cool / Rich / Soft; strength; post-capture preview; apply to SDR JPEG at save; style name in metadata; RAW untouched; skin-tone-safe tuning | D4 | Post-capture preview matches the saved output; strength works; original recoverable from RAW; no crash on 12 MP | 1–2 w |
 | **D6** | **Sietch handoff** | "Save to Sietch" after capture (explicit intent), plus a shared-folder save via the existing storage location; Sietch `ACTION_SEND` receiver with folder picker, remembered folder, progress | D2 + Sietch change | One tap sends a JPEG/DNG; Sietch saves into a chosen folder and opens it; no share sheet needed | 1–2 w (+3–5 d Sietch) |
 | **D7** | **Uno integration** | Category `image`, description; shortcuts Photo/Selfie/Manual/Scan; deep links; processing Live Update; Uno island quick action, control-panel tile, search action; optional camera widget | D5, D6 | Long-press shows shortcuts; island action opens a mode; Live Update shows and clears; Photos widget sees new files | 1–2 w |
-| **D8** | **Hardening and v1 release** | JVM tests, instrumented intent tests, device checklist, thermal/battery pass, accessibility, privacy audit, release notes, signed APK | all | Checklist signed off; no ANRs over a 30-minute burst; permissions audited; release notes name upstream base | 1–2 w |
+| **D8** | **Hardening and v1 release** | JVM tests, instrumented intent tests, device checklist, thermal/battery pass, accessibility, privacy audit, release notes, signed APK | all | Checklist signed off; no ANRs over a 30-minute burst; permissions audited; release notes name the upstream base and the Ix version | 1–2 w |
 
 **v1.0 = D1–D8.** Internal previews (`v0.1`, `v0.2`, `v0.3`) follow D2, D4 and D6 so the camera is usable and testable before the full set lands.
 
@@ -110,9 +112,8 @@ Holtzman/
 │       │   │   │   ├── capturer/                 # hot: ImageCapturer, ImageSaver
 │       │   │   │   ├── ui/activities/            # hot: MainActivity, settings
 │       │   │   │   └── suite/                    # NEW: all fork code
-│       │   │   │       ├── capture/              # output format, RAW/HDR save
+│       │   │   │       ├── ix/                   # imaging engine: formats, RAW/HDR, styles, colour
 │       │   │   │       ├── manual/               # ranges, interop, state
-│       │   │   │       ├── styles/               # presets, renderer
 │       │   │   │       ├── handoff/              # Sietch, MediaStore, SAF
 │       │   │   │       └── uno/                  # deep links, Live Update
 │       │   │   └── androidxc/                    # vendored patched CameraX/Exif (do not touch)
@@ -121,6 +122,7 @@ Holtzman/
 │       └── androidTest/                          # upstream tests + new intent tests
 ├── docs/
 │   ├── architecture.md
+│   ├── ix.md
 │   ├── upstream.md
 │   ├── integration.md
 │   └── decisions.md
@@ -188,15 +190,14 @@ The full runbook is in [docs/upstream.md](docs/upstream.md). The rules:
 
 ## 10. Open decisions
 
-1. **Name and application ID.** Holtzman / `com.everettpenne.holtzman` are placeholders. Settle before the first release.
-2. **UI strategy.** Recommended: upstream Views + a Glass token/resource layer. Alternative: a Compose `suite-ui` module later. Do not rewrite the viewfinder.
-3. **Manual engine.** Recommended: `Camera2CameraControl.addCaptureRequestOptions` with CameraX; fallback: a separate Camera2 manual activity.
-4. **RAW/Ultra HDR path.** Recommended: CameraX output formats; fallback: custom Camera2/DNG path. Decide after the D2 spike.
-5. **Styles implementation.** Recommended: ColorMatrix + tone curve in v1; native 3D LUT later.
-6. **Sietch handoff.** Recommended: explicit `ACTION_SEND` to Sietch with a remembered folder, plus the existing SAF storage location for zero-friction direct saves. Both.
-7. **minSdk.** Upstream is 29; the suite is 31. Recommended: raise to 31 (GrapheneOS targets Android 12+), one-line divergence. Decide in D1.
-8. **System flavor.** A future `system` build could keep the system-camera intents for a GrapheneOS ROM integration. Not in v1.
-9. **Distribution.** GitHub releases initially; Gradle/CI signing comes later. Do not commit keys.
+1. **UI strategy.** Recommended: upstream Views + a Glass token/resource layer. Alternative: a Compose `suite-ui` module later. Do not rewrite the viewfinder.
+2. **Manual engine.** Recommended: `Camera2CameraControl.addCaptureRequestOptions` with CameraX; fallback: a separate Camera2 manual activity.
+3. **RAW/Ultra HDR path.** Recommended: CameraX output formats; fallback: custom Camera2/DNG path. Decide after the D2 spike.
+4. **Styles implementation.** Recommended: ColorMatrix + tone curve in Ix v1; native 3D LUT later.
+5. **Sietch handoff.** Recommended: explicit `ACTION_SEND` to Sietch with a remembered folder, plus the existing SAF storage location for zero-friction direct saves. Both.
+6. **minSdk.** Upstream is 29; the suite is 31. Recommended: raise to 31 (GrapheneOS targets Android 12+), one-line divergence. Decide in D1.
+7. **System flavor.** A future `system` build could keep the system-camera intents for a GrapheneOS ROM integration. Not in v1.
+8. **Distribution.** GitHub releases initially; Gradle/CI signing comes later. Do not commit keys.
 
 ## 11. Working agreements
 

@@ -118,10 +118,14 @@ No Internet, no storage, no contacts, no accounts. The camera must never add a p
 
 | Item | Value |
 | --- | --- |
-| Working name | Holtzman |
-| Application ID | `com.everettpenne.holtzman` (placeholder) |
+| Product | **Holtzman Camera** |
+| Imaging engine | **Ix** (no separate package or app) |
+| Application ID | `com.everettpenne.holtzman` (reserved) |
+| Launcher label | `Holtzman Camera`; short label `Holtzman` if the launcher truncates |
 | Debug suffix | `.dev` (upstream's pattern) |
+| Deep-link scheme | `holtzman://` |
+| About credit | "Holtzman Camera · Ix engine" |
 | Sietch package | `com.everettpenne.sietch` |
 | Uno package | `com.jake.duolauncher` (dev variant `com.jake.duolauncher.dev`) |
 
-The application ID is a one-way door. Settle the name before the first public release; changing it later loses the app's data and breaks shortcuts and Sietch's explicit intents.
+The application ID is a one-way door. It is settled as `com.everettpenne.holtzman`; changing it after release loses the app's data and breaks shortcuts and Sietch's explicit intents.

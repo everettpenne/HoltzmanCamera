@@ -1,6 +1,6 @@
-# Holtzman (working name)
+# Holtzman Camera
 
-A camera for the [Glass](https://github.com/everettpenne/Glass) suite, forked from [GrapheneOS Camera](https://github.com/GrapheneOS/Camera) (MIT).
+A camera for the [Glass](https://github.com/everettpenne/Glass) suite, forked from [GrapheneOS Camera](https://github.com/GrapheneOS/Camera) (MIT). Its imaging engine is **Ix**.
 
 **Status: planning.** This repository currently contains the upstream code plus the project plan. No suite feature has been implemented yet.
 
@@ -8,6 +8,7 @@ The fork keeps GrapheneOS Camera's camera core and adds the things the suite nee
 
 - [Project outline](PROJECT.md) — goals, deliverables, milestones, risks
 - [Architecture](docs/architecture.md) — structure, capture pipeline, data flow
+- [Ix engine](docs/ix.md) — what the imaging engine owns and why
 - [Upstream strategy](docs/upstream.md) — branches, sync runbook, conflict policy
 - [Suite integration](docs/integration.md) — Uno and Sietch contracts
 - [Decisions](docs/decisions.md) — the choices made so far

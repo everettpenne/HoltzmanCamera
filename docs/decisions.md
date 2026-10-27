@@ -117,13 +117,20 @@ GrapheneOS targets current Pixels on Android 12+; the rest of the suite is `minS
 
 ---
 
-## ADR-011 — Name and application ID are placeholders
+## ADR-011 — Name: Holtzman Camera, engine: Ix
 
-**Status:** proposed.
+**Status:** chosen (2026-10-27); changeable until the first public release.
 
-`Holtzman` and `com.everettpenne.holtzman` are working values. The name should fit the suite's Dune vocabulary and be pronounceable; the application ID must be settled before the first public release.
+- **Product:** **Holtzman Camera**.
+- **Imaging engine:** **Ix** (pronounced "icks"), the Dune planet of invention and technology.
+- **Application ID:** `com.everettpenne.holtzman` (reserved).
+- **Launcher label:** `Holtzman Camera`; the debug build appends ` d` (upstream's pattern).
+- **Deep-link scheme:** `holtzman://`.
+- **Credit:** "Holtzman Camera · Ix engine" in About; no visible watermark by default.
 
-**Consequences:** renaming before release is cheap; after release it loses data and breaks intents. Decide in D1, not D8.
+The long launcher label may truncate on a home screen. If it does, the short label can be **Holtzman** while the About page, README and store listing keep the full product name. Do not rename the application ID to shorten a label.
+
+**Consequences:** after the first public release the application ID is a one-way door; changing it loses installed data and breaks Sietch's explicit intents and Uno shortcuts. Before then it can still change. The engine name is independent of the app version and can be reused if Ix ever serves another app.
 
 ---
 
@@ -134,3 +141,15 @@ GrapheneOS targets current Pixels on Android 12+; the rest of the suite is `minS
 Generic fixes (bugs, CameraX compatibility, accessibility) are cut from `upstream/main`, prefixed `upstream:` and offered as PRs. Suite-specific work never goes upstream.
 
 **Consequences:** when a fix lands upstream, the local branch is dropped and the next sync brings it in. This keeps the fork a good citizen and reduces permanent divergence.
+
+---
+
+## ADR-013 — Ix is the imaging engine, not the app
+
+**Status:** accepted (2026-10-27).
+
+Ix owns the image: output formats (JPEG, RAW/DNG, RAW+JPEG, Ultra HDR), colour and photographic styles, encoding, image metadata and fallbacks. It does **not** own camera control, the UI, permissions, storage destinations, Sietch handoff or Uno integration.
+
+The contract is deliberately narrow: bytes and capture facts in; files and warnings out. No `Context`, `Uri` or UI types. The app decides where the files go.
+
+**Consequences:** Ix can be tested with fixture images; the camera can be tested without the engine's internals; future computational work (burst HDR, Night, portrait) has a home that does not require renaming the product. In v1 it lives in `suite/ix`; a `:ix` Gradle module is only justified when native code or a second consumer arrives. See [`ix.md`](ix.md).
