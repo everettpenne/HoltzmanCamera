@@ -25,23 +25,35 @@ Key facts that the fork builds on:
 - CameraX **1.6.2** exposes `OUTPUT_FORMAT_RAW`, `OUTPUT_FORMAT_RAW_JPEG` and `OUTPUT_FORMAT_JPEG_ULTRA_HDR`; the fork can use these instead of writing a second capture engine.
 - `Camera2CameraControl.addCaptureRequestOptions` and `Camera2CameraInfo.getCameraCharacteristic` are available for manual controls without rebinding the camera.
 
-## 2. Fork packages
+## 2. Modules and packages
 
-New code goes under `app/src/main/java/app/grapheneos/camera/suite/`:
+The engine is the only new Gradle module:
+
+```
+ix/                                # pure Kotlin/JVM, JVM 17 bytecode, no Android
+└── src/main/kotlin/com/everettpenne/ix/
+    ├── IxEngine.kt                # interface + version
+    ├── IxModel.kt                 # source, capture, file, request, result, warnings
+    ├── IxColor.kt                 # colour + 4x5 matrix maths
+    ├── IxStyle.kt                 # presets, renderer, naming
+    └── PassThroughIxEngine.kt     # skeleton, not shippable
+```
+
+App-side code goes under `app/src/main/java/app/grapheneos/camera/suite/`:
 
 ```
 suite/
-├── ix/          # Ix imaging engine: formats, RAW/HDR, colour, styles, metadata
+├── ix/          # adapter: ImageProxy/Bitmap -> IxSource, IxFile -> MediaStore/SAF
 ├── manual/      # ManualState, sensor ranges, Camera2 interop, auto<->manual transitions
 ├── handoff/     # Sietch intent, FileProvider URIs, MediaStore/SAF helpers
 └── uno/         # deep links, shortcut routing, Live Update
 ```
 
-**Ix** is the engine that owns the image: bytes in, files and warnings out. Its contract and internal layout are in [ix.md](ix.md). It has no `Context`, `Uri` or UI types; the app decides where the bytes go.
+**Ix** is the engine that owns the image: bytes in, files and warnings out. Its contract and internal layout are in [ix.md](ix.md). It has no `Context`, `Uri` or UI types; the app decides where the bytes go. The module boundary is compile-time enforcement, not just documentation.
 
 Plus new resources (`res/values/suite_colors.xml`, `suite_themes.xml`, `suite_strings.xml`, `res/layout/suite_*.xml`, `res/font/inter_variable.ttf`) and a `user` source-set overlay for the build without system-camera intents.
 
-**Do not add a Gradle module in v1.** A `:ix` module only makes sense when the engine needs native code or a second consumer. Keeping v1 in `:app` avoids touching `settings.gradle.kts` and keeps the upstream build mergeable.
+The build-file cost is small and deliberate: `settings.gradle.kts` (`include(":ix")`), `app/build.gradle.kts` (`implementation(project(":ix"))`), `gradle/libs.versions.toml` (JUnit, JVM plugin alias) and 32 lines of dependency-verification metadata for the Kotlin JVM plugin. No Android dependency is added to the engine.
 
 ## 3. Capture pipeline
 
@@ -178,7 +190,7 @@ Never add `INTERNET`. Never add storage permissions; use MediaStore/SAF. Strip E
 
 ## 9. Testing
 
-- **JVM tests** (new `app/src/test/`): manual range/step clamping, style matrix maths, file naming/MIME, deep-link parsing, share-intent construction.
+- **JVM tests:** `ix/src/test/` covers the engine (model, colour maths, presets, naming, pass-through). `app/src/test/` is added later for manual range/step clamping, deep-link parsing and share-intent construction.
 - **Instrumented tests** (existing `app/src/androidTest/`): shortcuts resolve to the right mode, permissions flow, save to MediaStore, Sietch intent targets the package, Live Update starts/stops.
 - **Device checklist** (Pixel, current GrapheneOS): every mode, manual changes, DNG opens elsewhere, Ultra HDR on/off, styles, EXIF, 30-minute thermal run, Sietch handoff, Uno shortcuts and island action.
 - **Emulator** is for UI/intents only. It cannot validate focus, HDR, thermal or image quality.
@@ -189,7 +201,7 @@ Never add `INTERNET`. Never add storage permissions; use MediaStore/SAF. Strip E
 | --- | --- |
 | Gradle | 9.8.2 (wrapper) |
 | AGP | 9.4.1 |
-| Kotlin | 2.4.21 (AGP built-in Kotlin; no separate Kotlin plugin in `app`) |
+| Kotlin | 2.4.21 (AGP built-in Kotlin in `app`; Kotlin/JVM plugin in `:ix`) |
 | compileSdk / targetSdk | 37 |
 | minSdk | 29 upstream; proposed 31 for suite parity |
 | Build tools | 37.0.0 |

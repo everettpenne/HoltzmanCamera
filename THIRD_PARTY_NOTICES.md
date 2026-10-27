@@ -8,6 +8,8 @@ Holtzman is a fork of GrapheneOS Camera. The upstream project and its dependenci
 | AndroidX / Jetpack, including CameraX | Apache-2.0 | Gradle dependencies; the vendored `androidxc/` classes are patched AndroidX code |
 | Material Components for Android | Apache-2.0 | Gradle dependency |
 | ZXing Core | Apache-2.0 | QR/barcode scanning |
+| Kotlin / kotlin-stdlib | Apache-2.0 | The engine and the app |
+| JUnit 4 | EPL-1.0 | Tests only (`:ix` and future app unit tests); not shipped |
 | [Inter](https://github.com/rsms/inter) | SIL OFL 1.1 | Planned: the suite typeface. Add `docs/licenses/Inter-OFL.txt` with the font |
 | [Glass](https://github.com/everettpenne/Glass) design tokens | MIT | Planned: colours, type scale and corner values copied into XML (not the Compose library) |
 

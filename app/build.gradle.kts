@@ -92,6 +92,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":ix"))
+
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)

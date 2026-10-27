@@ -2,7 +2,7 @@
 
 A camera for the [Glass](https://github.com/everettpenne/Glass) suite, forked from [GrapheneOS Camera](https://github.com/GrapheneOS/Camera) (MIT). Its imaging engine is **Ix**.
 
-**Status: planning.** This repository currently contains the upstream code plus the project plan. No suite feature has been implemented yet.
+**Status: planning + Ix skeleton.** The `:ix` module now contains the engine contract, colour/style maths, naming, warnings and a pass-through implementation with 27 JVM tests. The camera app itself is still upstream code; no camera feature has been changed yet.
 
 The fork keeps GrapheneOS Camera's camera core and adds the things the suite needs: manual controls, RAW/DNG, Ultra HDR, photographic styles, a one-tap handoff to Sietch, and the metadata and shortcuts that make it a first-class app in Uno Launcher.
 
@@ -26,10 +26,11 @@ Upstream currently needs:
 - Gradle 9.8.2 (the wrapper downloads it)
 
 ```bash
-./gradlew :app:assembleDebug
+./gradlew :ix:test            # the Ix engine; no Android SDK needed
+./gradlew :app:assembleDebug  # the camera app
 ```
 
-`local.properties` with `sdk.dir=...` is required. See the [toolchain section](PROJECT.md#7-toolchain) for the current machine's gaps.
+`local.properties` with `sdk.dir=...` is required for the app. If your home directory is not writable (CI, sandbox), set `ANDROID_USER_HOME` to a writable path so the debug keystore can be created. See the [toolchain section](PROJECT.md#7-toolchain) for the current machine's setup.
 
 ## Licence
 

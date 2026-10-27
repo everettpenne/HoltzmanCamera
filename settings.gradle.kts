@@ -11,5 +11,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Camera"
-include(":app")
+rootProject.name = "HoltzmanCamera"
+include(":app", ":ix")

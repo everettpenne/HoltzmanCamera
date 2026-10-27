@@ -81,7 +81,7 @@ git tag upstream-base-$(date +%Y-%m-%d) upstream/main
 
 1. **Upstream wins on camera behaviour.** If the conflict is in the capture path and there is no suite requirement to change it, take upstream's version. Re-apply the suite feature in `suite/` afterwards.
 2. **Suite behaviour wins only where the product differs** (manual mode, RAW/Ultra HDR, styles, Sietch handoff, Uno metadata).
-3. **New code in new files.** A feature that can live in `app/grapheneos/camera/suite/` must live there.
+3. **New code in new files.** Engine work lives in the `:ix` module; app-side work in `app/grapheneos/camera/suite/`. Only the adapter crosses the boundary.
 4. **No mass formatting, no package rename, no dependency churn.** Every changed upstream line should have a sentence of justification in the commit message.
 5. **Use resource/flavor overlays instead of editing upstream resources** where possible. Overriding `colors.xml`/`themes.xml` in a source set is cheaper to merge than editing them.
 6. **Keep the upstream tests green.** A suite change that breaks an upstream instrumented test is not finished.
@@ -93,7 +93,11 @@ These are the upstream files the fork is expected to touch. Keep the list short,
 
 | File | Why | Expected conflict |
 | --- | --- | --- |
-| `app/build.gradle.kts` | `applicationId`, `resValue` name, `minSdk`, test dependencies, future flavors | Low–medium |
+| `settings.gradle.kts` | `include(":ix")`, root project name | Low |
+| `app/build.gradle.kts` | `applicationId`, `resValue` name, `minSdk`, `implementation(project(":ix"))`, test dependencies, future flavors | Low–medium |
+| `gradle/libs.versions.toml` | JUnit for the engine tests; no upstream dependency changes otherwise | Low |
+| `gradle/verification-metadata.xml` | 32 lines for the Kotlin JVM plugin (Kotlin scripting artifacts). Do not regenerate the whole file; add only what the build reports missing | Low–medium (upstream Kotlin bumps also touch it) |
+| `ix/` | New pure JVM module; no upstream file is changed | None (new files) |
 | `app/src/main/AndroidManifest.xml` | Label/category/description, shortcuts meta-data, user-build intent removal | Medium (upstream changes intents) |
 | `app/src/main/java/app/grapheneos/camera/CamConfig.kt` | Mode list, capture builder (output format, manual interop), settings keys | **High** (active file) |
 | `app/src/main/java/app/grapheneos/camera/capturer/ImageCapturer.kt` | Choose saver path, pass style/output options | Medium |

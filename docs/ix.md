@@ -26,42 +26,51 @@ This boundary is the point: the engine can be tested with files, and the camera 
 
 ## 3. Where it lives
 
-**v1:** `app/src/main/java/app/grapheneos/camera/suite/ix/`.
+**v1:** the pure JVM module `:ix`, source under `ix/src/main/kotlin/com/everettpenne/ix/`.
 
 ```
-suite/ix/
-├── IxEngine.kt          # the entry point and orchestration
-├── IxRequest.kt         # capture input, style, output choice
-├── IxResult.kt          # files + warnings
-├── format/              # JPEG, DNG, RAW+JPEG, Ultra HDR
-├── color/               # matrices, tone curves, LUTs, skin protection
-├── style/               # presets and strength
-└── meta/                # EXIF/XMP, naming, MIME
+ix/
+├── build.gradle.kts             # Kotlin/JVM, JVM 17 bytecode, no Android
+├── src/main/kotlin/com/everettpenne/ix/
+│   ├── IxEngine.kt              # the interface and version
+│   ├── IxModel.kt               # source, capture, file, request, result, warnings
+│   ├── IxColor.kt               # colour value and 4x5 matrix maths
+│   ├── IxStyle.kt               # presets and the ARGB style renderer
+│   ├── IxNaming.kt              # file names
+│   └── PassThroughIxEngine.kt   # skeleton implementation (not shippable)
+└── src/test/kotlin/com/everettpenne/ix/
 ```
 
-**Later:** if the work needs native code or a second consumer, promote it to a `:ix` Gradle module with no Android UI dependencies. Do not do that in v1; a module boundary now would add build-file divergence for no benefit.
+**Why a module at all?** It enforces the boundary at compile time: Ix cannot accidentally grow a `Context` or a `Uri`, and its tests run without the Android SDK. The cost is a small, deliberate divergence in `settings.gradle.kts`, `app/build.gradle.kts`, `gradle/libs.versions.toml` and the Gradle verification metadata.
+
+**Later:** the internal packages (`format/`, `color/`, `style/`, `meta/`) can be split inside the module as the encoders land; native code can move into `ix/src/main/cpp/` without changing the contract. The app-side adapter (Android `ImageProxy`/`Bitmap` to `IxSource`, `IxFile` to MediaStore/SAF) lives in `app/.../suite/ix/`.
 
 ## 4. Contract (sketch, not final)
 
 ```kotlin
 data class IxRequest(
-    val source: IxSource,          // bytes or a file descriptor, plus the source format
+    val source: IxSource,          // bytes, source format, dimensions
     val capture: IxCaptureInfo,    // orientation, timestamp, sensor/exposure facts
     val style: IxStyle?,           // preset + strength; null for "no style"
     val output: IxOutput,          // JPEG, RAW, RAW_JPEG, ULTRA_HDR
+    val baseName: String,          // "IMG_yyyyMMdd_HHmmss"
 )
 
 data class IxResult(
-    val files: List<IxFile>,       // bytes/paths, MIME, suffix, metadata
-    val warnings: List<IxWarning>, // "Ultra HDR unsupported, saved JPEG", etc.
+    val files: List<IxFile>,       // bytes, name, MIME, kind, primary
+    val warnings: List<IxWarning>, // fallbacks, skipped style, unsupported source
+    val engineVersion: String,
 )
 
 interface IxEngine {
-    suspend fun render(request: IxRequest): IxResult
+    val version: String
+    fun render(request: IxRequest): IxResult
 }
 ```
 
-The contract is deliberately narrow: **bytes in, files out, warnings in the result**. No `Context`, no `Uri`, no UI types. That keeps it testable and lets the app decide where the files go.
+The contract is deliberately narrow: **bytes in, files out, warnings in the result**. No `Context`, no `Uri`, no UI types. The app calls `render` on a background thread and decides where the bytes are written.
+
+**Skeleton status (2026-10-27):** `PassThroughIxEngine` implements the contract without decoding: it passes JPEG, DNG and Ultra HDR bytes through, reports style requests as `StyleSkipped`, and refuses RAW→JPEG. `IxStyleRenderer` already applies the style matrices to an ARGB buffer. 27 JVM tests cover the model, colour maths, presets, naming and pass-through behaviour. It is a contract scaffold, **not** Ix 1; the real encoders and style stage replace it before release.
 
 ## 5. Pipeline
 
