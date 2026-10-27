@@ -28,7 +28,7 @@ The source stays under `app.grapheneos.camera`; the installed identity becomes `
 
 **Status:** accepted for v1.
 
-Glass `v0.6.0` is Gradle 8.14.3 / AGP 8.11 / Kotlin 2.1.20 / compileSdk 36 / minSdk 31. The camera fork is Gradle 9.8.2 / AGP 9.4.1 / Kotlin 2.4.21 / compileSdk 37 / minSdk 29. `includeBuild("../Glass")` will not work.
+Glass `v0.6.0` is Gradle 8.14.3 / AGP 8.11 / Kotlin 2.1.20 / compileSdk 36 / minSdk 31. The camera fork is Gradle 9.8.2 / AGP 9.4.1 / Kotlin 2.4.21 / compileSdk 37; its `minSdk` is now 31 too. `includeBuild("../Glass")` will not work.
 
 **Decision:** match the look with XML resources (colours, Inter, corner scale, haptics, motion) and new Views. Revisit when Glass moves to AGP 9 — which its own README anticipates for Backdrop 2.x.
 
@@ -101,15 +101,15 @@ Two paths:
 
 Android 11+ will not deliver `IMAGE_CAPTURE`, `IMAGE_CAPTURE_SECURE`, `VIDEO_CAPTURE`, `STILL_IMAGE_CAMERA` or `STILL_IMAGE_CAMERA_SECURE` to a user-installed app. Keeping the filters misrepresents what the app can do.
 
-**Decision:** the `user` build removes those filters (preferably via a source-set manifest overlay with `tools:node="remove"`, not by deleting upstream lines). A future `system` flavor can restore them for a GrapheneOS image build.
+**Decision:** D1 removes the filters and the secure/lock-screen activities directly from `AndroidManifest.xml`, and removes `DISABLE_KEYGUARD`. The helper classes stay for source compatibility. A source-set overlay with `tools:node="remove"` is deferred until a `system` flavor exists; a future system build can restore the upstream declarations.
 
-**Consequences:** the fork cannot be the default/lock-screen/power-double-press camera. Uno and Sietch must launch it explicitly. Document this in the README so nobody expects otherwise.
+**Consequences:** the fork cannot be the default/lock-screen/power-double-press camera. Uno and Sietch must launch it explicitly. The manifest is now a deliberate hot file, so every upstream intent change is reviewed at merge time. Document this in the README so nobody expects otherwise.
 
 ---
 
 ## ADR-010 — Raise `minSdk` from 29 to 31
 
-**Status:** proposed.
+**Status:** accepted (2026-10-27); implemented in D1.
 
 GrapheneOS targets current Pixels on Android 12+; the rest of the suite is `minSdk 31`. Raising it removes legacy branches and allows real Glass later. It is a one-line divergence.
 
@@ -119,7 +119,7 @@ GrapheneOS targets current Pixels on Android 12+; the rest of the suite is `minS
 
 ## ADR-011 — Name: Holtzman Camera, engine: Ix
 
-**Status:** chosen (2026-10-27); changeable until the first public release.
+**Status:** accepted (2026-10-27); implemented in D1.
 
 - **Product:** **Holtzman Camera**.
 - **Imaging engine:** **Ix** (pronounced "icks"), the Dune planet of invention and technology.
@@ -153,3 +153,15 @@ Ix owns the image: output formats (JPEG, RAW/DNG, RAW+JPEG, Ultra HDR), colour a
 The contract is deliberately narrow: bytes and capture facts in; files and warnings out. No `Context`, `Uri` or UI types. The app decides where the files go.
 
 **Consequences:** Ix can be tested with fixture images; the camera can be tested without the engine's internals; future computational work (burst HDR, Night, portrait) has a home that does not require renaming the product. It lives in the **pure JVM `:ix` module** from the start, which enforces the no-Android boundary at compile time and lets its tests run without the Android SDK. The cost is a small build-file divergence: `settings.gradle.kts`, `app/build.gradle.kts`, `gradle/libs.versions.toml` and 32 lines of dependency-verification metadata for the Kotlin JVM plugin. The app-side adapter stays in `app/.../suite/ix/`. See [`ix.md`](ix.md).
+
+---
+
+## ADR-014 — Fixed Glass palette, not Material You
+
+**Status:** accepted (2026-10-27).
+
+Upstream calls `DynamicColors.applyToActivitiesIfAvailable` and wraps the settings dialog in a dynamic context. That makes the mode pill, switches and selected chips take the wallpaper's colours; on the test device the Holtzman palette became blue.
+
+**Decision:** Holtzman disables dynamic colour. `Theme.Camera` and `Theme.App` use the fixed ink/surface/amber palette in `values/holtzman.xml`, Inter, and the 8/16/24dp corner scale. The settings dialog uses `Theme.SettingsDialog` directly.
+
+**Consequences:** the camera keeps the suite identity on every wallpaper and theme setting. There is no per-user Material You tint; a future Glass theme system can provide deliberate variants instead. This is a small upstream edit in `App.kt` and `MainActivity.kt`, recorded in the hot-file list.

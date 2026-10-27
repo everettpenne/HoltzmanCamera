@@ -14,7 +14,6 @@ import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import app.grapheneos.camera.capturer.deleteStalePendingRecordings
 import app.grapheneos.camera.ui.activities.MainActivity
-import com.google.android.material.color.DynamicColors
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
@@ -86,7 +85,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         registerActivityLifecycleCallbacks(activityLifeCycleHelper)
-        DynamicColors.applyToActivitiesIfAvailable(this)
+        // Holtzman uses the Glass palette, not the wallpaper-derived Material You palette.
 
         thread {
             deleteStalePendingRecordings(this)

@@ -6,13 +6,42 @@
 
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+
+        <!-- The suite's type and glass palette. -->
+        <item name="android:fontFamily">@font/inter_variable</item>
+        <item name="fontFamily">@font/inter_variable</item>
+        <item name="android:windowBackground">@color/holtzman_ink</item>
+        <item name="colorPrimary">@color/holtzman_accent</item>
+        <item name="colorOnPrimary">@color/holtzman_ink</item>
+        <item name="colorSurface">@color/holtzman_surface</item>
+        <item name="colorOnSurface">@color/holtzman_cream</item>
+        <item name="colorSurfaceContainer">@color/holtzman_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/holtzman_surface_high</item>
+        <item name="colorOutline">@color/holtzman_hairline</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Holtzman.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Holtzman.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Holtzman.Large</item>
     </style>
 
-    <style name="Theme.App" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.App" parent="Theme.Material3.Dark.NoActionBar">
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
 
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/holtzman_ink</item>
+
+        <item name="android:fontFamily">@font/inter_variable</item>
+        <item name="fontFamily">@font/inter_variable</item>
+        <item name="colorPrimary">@color/holtzman_accent</item>
+        <item name="colorOnPrimary">@color/holtzman_ink</item>
+        <item name="colorSurface">@color/holtzman_surface</item>
+        <item name="colorOnSurface">@color/holtzman_cream</item>
+        <item name="colorSurfaceContainer">@color/holtzman_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/holtzman_surface_high</item>
+        <item name="colorOutline">@color/holtzman_hairline</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Holtzman.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Holtzman.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Holtzman.Large</item>
     </style>
 
     <style name="Theme.SettingsDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog.Centered">

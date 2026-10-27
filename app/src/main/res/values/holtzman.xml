@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The suite palette, kept in one place so the camera, settings and dialogs agree. -->
+    <color name="holtzman_ink">#081217</color>
+    <color name="holtzman_surface">#16262E</color>
+    <color name="holtzman_surface_high">#223943</color>
+    <color name="holtzman_accent">#E7A45C</color>
+    <color name="holtzman_cream">#F4EADB</color>
+    <color name="holtzman_hairline">#33FFFFFF</color>
+
+    <dimen name="holtzman_corner_small">8dp</dimen>
+    <dimen name="holtzman_corner_medium">16dp</dimen>
+    <dimen name="holtzman_corner_large">24dp</dimen>
+
+    <style name="ShapeAppearance.Holtzman.Small" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/holtzman_corner_small</item>
+    </style>
+    <style name="ShapeAppearance.Holtzman.Medium" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/holtzman_corner_medium</item>
+    </style>
+    <style name="ShapeAppearance.Holtzman.Large" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/holtzman_corner_large</item>
+    </style>
+</resources>

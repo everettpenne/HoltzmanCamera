@@ -6,14 +6,14 @@ The camera is only half the feature. This document is the contract between the c
 
 ### What the camera publishes
 
-| Thing | Value |
-| --- | --- |
-| `android:category` | `image` (Uno's App Library files it under Images) |
-| `android:description` | "Manual camera with RAW, Ultra HDR and styles" (search alias: camera, manual, raw, hdr, scan) |
-| Shortcuts | Photo · Selfie · Manual · Scan |
-| Deep links | `holtzman://photo`, `holtzman://selfie`, `holtzman://manual`, `holtzman://scan`, `holtzman://video` |
-| Live Update | While saving a RAW/Ultra HDR/style job: short text plus progress; cleared when done |
-| Widget (stretch) | Photo / Selfie / Manual / Scan buttons and the last shot; RemoteViews cannot host a live preview |
+| Thing | Value | Status |
+| --- | --- | --- |
+| `android:category` | `image` (Uno's App Library files it under Images) | done in D1 |
+| `android:description` | "A camera for the Glass suite: photo, video, scan, manual, RAW and Ultra HDR." | done in D1 |
+| Shortcuts | Photo · Selfie · Manual · Scan | D7 |
+| Deep links | `holtzman://photo`, `holtzman://selfie`, `holtzman://manual`, `holtzman://scan`, `holtzman://video` | D7 |
+| Live Update | While saving a RAW/Ultra HDR/style job: short text plus progress; cleared when done | D7 |
+| Widget (stretch) | Photo / Selfie / Manual / Scan buttons and the last shot; RemoteViews cannot host a live preview | not in v1 |
 
 Shortcuts are manifest shortcuts with explicit `android:data` URIs, the same pattern Spice, Thumper and Sietch already use. The launcher activity reads the data and selects the mode; it clears the intent afterwards so the same shortcut works twice.
 
@@ -40,7 +40,7 @@ Android 11+ reserves `IMAGE_CAPTURE`, `IMAGE_CAPTURE_SECURE`, `VIDEO_CAPTURE`, `
 - the app that opens when another app asks for a photo,
 - the target of Android's camera intents in general.
 
-The user build must **not** declare those filters: claiming an intent the OS will not deliver is a lie in the manifest. Keep the upstream activities for source compatibility, but remove their filters in the `user` build (see the flavor discussion in [`decisions.md`](decisions.md)). A future `system` flavor, built into a GrapheneOS image, can restore them.
+The user build must **not** declare those filters: claiming an intent the OS will not deliver is a lie in the manifest. D1 removed the filters and the secure activities directly from `AndroidManifest.xml`; the helper classes remain for source compatibility. A future `system` flavor, built into a GrapheneOS image, can restore them (see ADR-009).
 
 Uno can still target the camera **explicitly** for its own flows (`Intent.setPackage("com.everettpenne.holtzman")`), which is how Sietch's "Scan a document" should launch it.
 

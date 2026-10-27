@@ -102,12 +102,15 @@ These are the upstream files the fork is expected to touch. Keep the list short,
 | `app/src/main/java/app/grapheneos/camera/CamConfig.kt` | Mode list, capture builder (output format, manual interop), settings keys | **High** (active file) |
 | `app/src/main/java/app/grapheneos/camera/capturer/ImageCapturer.kt` | Choose saver path, pass style/output options | Medium |
 | `app/src/main/java/app/grapheneos/camera/capturer/ImageSaver.kt` | Debug Ix pass (D0.7), later RAW/Ultra HDR bytes, style application, Sietch handoff | **High** |
-| `app/src/main/java/app/grapheneos/camera/ui/activities/MainActivity.kt` | Mode entry points, manual panel wiring | Medium–high |
+| `app/src/main/java/app/grapheneos/camera/ui/activities/MainActivity.kt` | Mode entry points, manual panel wiring, fixed settings-dialog theme | Medium–high |
+| `app/src/main/java/app/grapheneos/camera/App.kt` | Dynamic colour disabled (ADR-014) | Low |
+| `app/src/main/java/app/grapheneos/camera/ui/activities/MoreSettings.kt` | About row and dialog | Low |
 | `app/src/main/java/app/grapheneos/camera/ui/SettingsDialog.kt` | Manual/style/RAW settings rows | Medium |
 | `app/src/main/res/values/strings.xml`, `colors.xml`, `themes.xml`, `dimens.xml` | Glass token parity | Low (prefer overlay) |
+| `app/src/main/res/values/holtzman.xml`, `res/font/inter_variable.ttf`, `res/drawable/ic_launcher_*`, `res/mipmap-anydpi*` | New Glass palette, Inter, aperture icon | None (new files) |
 | `app/src/main/res/layout/*.xml` | New panels/controls | Low (new files preferred) |
 
-**Preferred alternative for manifest removals:** a `user` source-set overlay with `tools:node="remove"` for the system-camera activities. That keeps `AndroidManifest.xml` closer to upstream. The exact overlay is a D1 task; see [`decisions.md`](decisions.md).
+**Manifest removals:** D1 edited `AndroidManifest.xml` directly (filters and secure activities) and removed `DISABLE_KEYGUARD`. The helper classes stay. A `user` source-set overlay with `tools:node="remove"` is deferred until a `system` flavor exists; see [ADR-009](decisions.md#adr-009--remove-system-camera-intents-from-the-user-build).
 
 ## Upstreamable work
 

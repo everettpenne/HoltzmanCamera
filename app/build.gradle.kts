@@ -45,11 +45,11 @@ android {
     namespace = "app.grapheneos.camera"
 
     defaultConfig {
-        applicationId = "app.grapheneos.camera"
-        minSdk = 29
+        applicationId = "com.everettpenne.holtzman"
+        minSdk = 31
         targetSdk = 37
-        versionCode = 94
-        versionName = versionCode.toString()
+        versionCode = 1
+        versionName = "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -62,12 +62,12 @@ android {
             if (useKeystoreProperties) {
                 signingConfig = signingConfigs.getByName("release")
             }
-            resValue("string", "app_name", "Camera")
+            resValue("string", "app_name", "Holtzman Camera")
         }
 
         getByName("debug") {
             applicationIdSuffix = ".dev"
-            resValue("string", "app_name", "Camera d")
+            resValue("string", "app_name", "Holtzman Camera d")
             // isDebuggable = false
         }
 

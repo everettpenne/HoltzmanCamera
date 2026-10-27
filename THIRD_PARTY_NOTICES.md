@@ -10,8 +10,8 @@ Holtzman is a fork of GrapheneOS Camera. The upstream project and its dependenci
 | ZXing Core | Apache-2.0 | QR/barcode scanning |
 | Kotlin / kotlin-stdlib | Apache-2.0 | The engine and the app |
 | JUnit 4 | EPL-1.0 | Tests only (`:ix` and future app unit tests); not shipped |
-| [Inter](https://github.com/rsms/inter) | SIL OFL 1.1 | Planned: the suite typeface. Add `docs/licenses/Inter-OFL.txt` with the font |
-| [Glass](https://github.com/everettpenne/Glass) design tokens | MIT | Planned: colours, type scale and corner values copied into XML (not the Compose library) |
+| [Inter](https://github.com/rsms/inter) | SIL OFL 1.1 | The suite typeface (`app/src/main/res/font/inter_variable.ttf`); licence in `docs/licenses/Inter-OFL.txt` |
+| [Glass](https://github.com/everettpenne/Glass) design tokens | MIT | Colours, corner scale and type values copied into XML (not the Compose library) |
 
 The upstream MIT notice is retained in [`LICENSE`](LICENSE). If a dependency is added, add a row here in the same commit.
 

@@ -1,7 +1,7 @@
 # Holtzman Camera — project outline
 
 **Product:** Holtzman Camera. **Imaging engine:** Ix. **Package:** `com.everettpenne.holtzman`.
-**Status:** planning; D0, the D0.5 Ix skeleton, the D0.6 adapter and the D0.7 debug JPEG hook are done. **Base:** GrapheneOS Camera `main` at `0aa4cb0` (2026-10-23, versionCode 94), recorded in [`UPSTREAM`](UPSTREAM).
+**Status:** D1 done; the D0.5 Ix skeleton, D0.6 adapter and D0.7 debug JPEG hook are also done. D2 is next. **Base:** GrapheneOS Camera `main` at `0aa4cb0` (2026-10-23, versionCode 94), recorded in [`UPSTREAM`](UPSTREAM).
 **Licence:** MIT, upstream copyright preserved.
 
 > The name is chosen: **Holtzman Camera**, with **Ix** as the imaging engine. The application ID is reserved as `com.everettpenne.holtzman`; it can still change before the first public release, but not after — that would orphan installed data. See [the naming decisions](docs/decisions.md).
@@ -45,7 +45,7 @@ It is a **camera for people who already chose GrapheneOS**, not a Pixel Camera r
 | Constraint | Consequence |
 | --- | --- |
 | Upstream is **Views + ViewBinding + Material Components**, not Compose | Keep the upstream UI. Add new surfaces as Views; do not rewrite the viewfinder in Compose. |
-| Upstream is on **AGP 9.4.1 / Gradle 9.8.2 / Kotlin 2.4.21 / compileSdk 37 / minSdk 29** | The suite's Glass `v0.6.0` is AGP 8.11 / Gradle 8.14.3 / Kotlin 2.1.20 / compileSdk 36 / minSdk 31. `includeBuild("../Glass")` is **not** compatible in v1. Match Glass with resources and tokens instead; revisit when Glass moves to AGP 9. |
+| Upstream is on **AGP 9.4.1 / Gradle 9.8.2 / Kotlin 2.4.21 / compileSdk 37 / minSdk 29**; the fork raises `minSdk` to **31** | The suite's Glass `v0.6.0` is AGP 8.11 / Gradle 8.14.3 / Kotlin 2.1.20 / compileSdk 36 / minSdk 31. `includeBuild("../Glass")` is **not** compatible in v1. Match Glass with resources and tokens instead; revisit when Glass moves to AGP 9. |
 | Android 11+ reserves `IMAGE_CAPTURE`, `IMAGE_CAPTURE_SECURE`, `VIDEO_CAPTURE`, `STILL_IMAGE_CAMERA` and the secure variant for **preinstalled system camera apps** | A user-installed fork cannot be the default camera. Remove those intent filters from the user build (or move them behind a future `system` flavor). |
 | Pixels expose **only the Night** CameraX extension (per GrapheneOS) | Keep upstream's mode tabs honest: Night may work; HDR, Portrait and Face Retouch are not available through the extension on Pixels. Do not fake them. |
 | CameraX 1.6.2 supports `OUTPUT_FORMAT_RAW`, `OUTPUT_FORMAT_RAW_JPEG`, `OUTPUT_FORMAT_JPEG_ULTRA_HDR` and `CAPTURE_MODE_ZERO_SHUTTER_LAG` | RAW and Ultra HDR can stay on the CameraX capture path, reducing the need for a second Camera2 engine. Verify each in a spike. |
@@ -63,7 +63,7 @@ Estimates are for one developer, including tests and a device pass. D3/D4/D5 can
 | **D0.5** | **Ix skeleton** | Pure `:ix` JVM module: contract, colour/style maths, naming, warnings, pass-through engine; 27 JVM tests | D0 | `:ix:test` green; no Android imports; verification metadata updated | done |
 | **D0.6** | **Ix adapter** | `IxSources` (`ImageProxy`/`Bitmap`/`Uri`), `IxWriter` (MediaStore/SAF, pending and cleanup), `IxPipeline`; instrumented adapter test | D0.5 | app and `debugAndroidTest` compile; adapter has no new permissions; 3 instrumented tests pass on the API 36 emulator | done |
 | **D0.7** | **Debug JPEG hook** | Debug-only pass in `ImageSaver` after EXIF, before the normal write; fail-open; release builds never enter it | D0.6 | debug capture keeps the original bytes on any Ix failure; 4 instrumented tests pass; release path unchanged | done |
-| **D1** | **Buildable, rebranded fork** | `applicationId`, label, icon, About ("Holtzman Camera · Ix engine", upstream credit); Glass token layer (colours, Inter, corners, haptics); remove system-camera intents; CI builds | D0 | `:app:assembleDebug` green; installs beside GrapheneOS Camera; no system intents; About names Ix and credits upstream | 3–5 d |
+| **D1** | **Buildable, rebranded fork** | `applicationId` `com.everettpenne.holtzman` (debug `.dev`), label, aperture icon, About ("Holtzman Camera · Ix engine", upstream credit); fixed Glass palette + Inter; remove system-camera intents; CI builds | D0 | `:app:assembleDebug` green; installs as `com.everettpenne.holtzman.dev` beside GrapheneOS Camera; no system intents; About names Ix and credits upstream; debug capture passes through Ix | done |
 | **D2** | **v1 camera core** | Upstream features retained (photo, video, QR, Night where available); 4:3 default; tap focus/meter; volume shutter; MediaStore + SAF save; EXIF strip default; shortcuts and deep links; category/description | D1 | Photo/video save and appear in Gallery/Uno; shortcuts open the right mode; no permission beyond CAMERA (+ optional MIC/location) | 1–2 w |
 | **D3** | **Manual controls** | Shutter, ISO, focus and WB panels; sensor ranges from `CameraCharacteristics`; auto/manual switch; live histogram; ZSL and extensions disabled while manual; restore on exit | D2 | Each control visibly changes the capture; ranges are the device's; auto restores cleanly; JVM tests for range/step logic | 2–3 w |
 | **D4** | **Ix: RAW/DNG and Ultra HDR** | `OUTPUT_FORMAT_RAW`/`RAW_JPEG`; DNG save and EXIF; Ultra HDR `OUTPUT_FORMAT_JPEG_ULTRA_HDR` with gain map; graceful fallback when unsupported; storage naming | D2 (parallel with D3) | DNG opens in darktable/RawTherapee; Ultra HDR shows on an HDR display and falls back; files land in MediaStore/SAF correctly | 2–3 w |
@@ -214,7 +214,7 @@ The full runbook is in [docs/upstream.md](docs/upstream.md). The rules:
 3. **RAW/Ultra HDR path.** Recommended: CameraX output formats; fallback: custom Camera2/DNG path. Decide after the D2 spike.
 4. **Styles implementation.** Recommended: ColorMatrix + tone curve in Ix v1; native 3D LUT later.
 5. **Sietch handoff.** Recommended: explicit `ACTION_SEND` to Sietch with a remembered folder, plus the existing SAF storage location for zero-friction direct saves. Both.
-6. **minSdk.** Upstream is 29; the suite is 31. Recommended: raise to 31 (GrapheneOS targets Android 12+), one-line divergence. Decide in D1.
+6. **minSdk.** Resolved in D1: **31**, matching the suite and current GrapheneOS. Upstream remains 29; the one-line divergence is recorded in ADR-010.
 7. **System flavor.** A future `system` build could keep the system-camera intents for a GrapheneOS ROM integration. Not in v1.
 8. **Distribution.** GitHub releases initially; see [test builds and releases](docs/release.md) for the debug-pre-release vs signed-alpha path. Do not commit keys.
 

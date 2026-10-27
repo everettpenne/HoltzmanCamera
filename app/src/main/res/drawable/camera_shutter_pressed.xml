@@ -8,7 +8,7 @@
         android:width="6dp"/>
 
     <solid
-        android:color="@color/system_accent1_100"/>
+        android:color="@color/holtzman_accent"/>
 
     <size
         android:width="84dp"

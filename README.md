@@ -2,7 +2,7 @@
 
 A camera for the [Glass](https://github.com/everettpenne/Glass) suite, forked from [GrapheneOS Camera](https://github.com/GrapheneOS/Camera) (MIT). Its imaging engine is **Ix**.
 
-**Status: planning + Ix skeleton, adapter and debug hook.** The `:ix` module contains the engine contract, colour/style maths, naming, warnings and a pass-through implementation with 27 JVM tests. The app-side adapter (`IxSources`, `IxWriter`, `IxPipeline`) converts CameraX/`Bitmap`/`Uri` inputs and writes files to MediaStore or SAF. In **debug builds only**, the finished JPEG takes one fail-open pass through Ix before upstream writes it; release builds never enter the hook. Four instrumented tests pass on an API 36 emulator. The camera UI and capture policy are still upstream; no camera feature has been changed yet.
+**Status: D1 branded debug build.** Holtzman Camera now installs as `com.everettpenne.holtzman` (debug `…dev`), with its own aperture icon, "Holtzman Camera" label, About page ("Holtzman Camera · Ix engine", upstream credit), and a fixed Glass palette in place of Material You. The user manifest no longer declares the system-camera intents. The `:ix` module contains the engine contract, colour/style maths, naming, warnings and a pass-through implementation with 27 JVM tests. The adapter (`IxSources`, `IxWriter`, `IxPipeline`) converts CameraX/`Bitmap`/`Uri` inputs and writes files to MediaStore or SAF. In **debug builds only**, the finished JPEG takes one fail-open pass through Ix before upstream writes it; release builds never enter the hook. Four instrumented tests pass on an API 36 emulator, and a debug capture on the emulator logged a byte-identical Ix pass. The capture UI and policy are still upstream; manual, RAW, Ultra HDR and styles are next.
 
 The fork keeps GrapheneOS Camera's camera core and adds the things the suite needs: manual controls, RAW/DNG, Ultra HDR, photographic styles, a one-tap handoff to Sietch, and the metadata and shortcuts that make it a first-class app in Uno Launcher.
 
@@ -25,6 +25,7 @@ Upstream currently needs:
 - A full **JDK 17** for the Gradle toolchain (not a JRE); a newer JDK may run Gradle, but the toolchain still needs 17
 - Android SDK platform 37, build-tools 37.0.0, NDK 29.0.14206865
 - Gradle 9.8.2 (the wrapper downloads it)
+- `minSdk` is **31**; the app targets GrapheneOS/current Pixels
 
 ```bash
 ./gradlew :ix:test            # the Ix engine; no Android SDK needed

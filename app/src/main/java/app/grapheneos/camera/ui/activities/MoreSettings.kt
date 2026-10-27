@@ -19,12 +19,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import app.grapheneos.camera.BuildConfig
 import app.grapheneos.camera.CamConfig
 import app.grapheneos.camera.CapturedItems
 import app.grapheneos.camera.NumInputFilter
 import app.grapheneos.camera.R
 import app.grapheneos.camera.databinding.MoreSettingsBinding
 import app.grapheneos.camera.util.storageLocationToUiString
+import com.everettpenne.ix.IX_VERSION
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 
@@ -105,6 +108,7 @@ open class MoreSettings : AppCompatActivity(), TextView.OnEditorActionListener {
         }
 
         rootView = binding.rootView
+        addAboutRow()
 
         sLField = binding.storageLocationField
 
@@ -345,6 +349,29 @@ open class MoreSettings : AppCompatActivity(), TextView.OnEditorActionListener {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    /** The suite's About, kept out of the upstream settings layout so it is easy to move later. */
+    private fun addAboutRow() {
+        val row = TextView(this).apply {
+            text = getString(R.string.about_holtzman)
+            textSize = 16f
+            setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface))
+            val pad = (16 * resources.displayMetrics.density).toInt()
+            setPadding(pad, pad, pad, pad)
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { showAbout() }
+        }
+        binding.rootView.addView(row)
+    }
+
+    private fun showAbout() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.about_holtzman)
+            .setMessage(getString(R.string.about_holtzman_text, BuildConfig.VERSION_NAME, IX_VERSION))
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     companion object {

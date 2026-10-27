@@ -54,7 +54,22 @@ suite/
 
 **Ix** is the engine that owns the image: bytes in, files and warnings out. Its contract and internal layout are in [ix.md](ix.md). It has no `Context`, `Uri` or UI types; the app decides where the bytes go. The module boundary is compile-time enforcement, not just documentation. The adapter is the only code that knows both worlds; it is blocking and annotated `@WorkerThread`.
 
-Plus new resources (`res/values/suite_colors.xml`, `suite_themes.xml`, `suite_strings.xml`, `res/layout/suite_*.xml`, `res/font/inter_variable.ttf`) and a `user` source-set overlay for the build without system-camera intents.
+Plus new resources (`res/values/holtzman.xml`, `themes.xml` overrides, `res/font/inter_variable.ttf`, the aperture icon, and `strings.xml` additions). The user build removes the system-camera activities and filters directly in `AndroidManifest.xml`; a source-set overlay remains the cleaner option once the `system` flavor exists (see ADR-009).
+
+### 2.1 Identity and theme
+
+| Item | Value |
+| --- | --- |
+| Application ID | `com.everettpenne.holtzman`; debug suffix `.dev` |
+| Kotlin package | `app.grapheneos.camera` (kept for upstream merges) |
+| Launcher label | `Holtzman Camera` (`Holtzman Camera d` in debug) |
+| Version | `0.1.0` / code `1` |
+| Icon | Aperture glyph from the Glass icon recipe; adaptive, monochrome on API 33+ |
+| About | "Holtzman Camera · Ix engine", version, upstream MIT credit, roadmap note |
+| Theme | Dark glass palette, Inter, 8/16/24dp corners; **Material You disabled** |
+| Manifest | `category="image"`, description, no system-camera intents, no `DISABLE_KEYGUARD` |
+
+The `minSdk` is 31. The theme deliberately does not use `DynamicColors`: the suite identity is fixed, and wallpaper-derived colours made the mode pill and switches blue. `App.kt` no longer applies dynamic colours; the settings dialog uses `Theme.SettingsDialog` directly.
 
 The build-file cost is small and deliberate: `settings.gradle.kts` (`include(":ix")`), `app/build.gradle.kts` (`implementation(project(":ix"))`), `gradle/libs.versions.toml` (JUnit) and 32 lines of dependency-verification metadata for the Kotlin JVM plugin. No Android dependency is added to the engine.
 
@@ -194,7 +209,7 @@ Never add `INTERNET`. Never add storage permissions; use MediaStore/SAF. Strip E
 ## 9. Testing
 
 - **JVM tests:** `ix/src/test/` covers the engine (model, colour maths, presets, naming, pass-through). `app/src/test/` is added later for manual range/step clamping, deep-link parsing and share-intent construction.
-- **Instrumented tests** (existing `app/src/androidTest/`): the Ix adapter writes a Bitmap through MediaStore and reads it back; shortcuts resolve to the right mode, permissions flow, save to MediaStore, Sietch intent targets the package, Live Update starts/stops.
+- **Instrumented tests** (existing `app/src/androidTest/`): the Ix adapter writes a Bitmap through MediaStore and reads it back, the debug hook is fail-open, and JPEG padding is trimmed; shortcuts resolve to the right mode, permissions flow, save to MediaStore, Sietch intent targets the package, Live Update starts/stops.
 - **Device checklist** (Pixel, current GrapheneOS): every mode, manual changes, DNG opens elsewhere, Ultra HDR on/off, styles, EXIF, 30-minute thermal run, Sietch handoff, Uno shortcuts and island action.
 - **Emulator** is for UI/intents only. It cannot validate focus, HDR, thermal or image quality.
 
@@ -206,7 +221,7 @@ Never add `INTERNET`. Never add storage permissions; use MediaStore/SAF. Strip E
 | AGP | 9.4.1 |
 | Kotlin | 2.4.21 (AGP built-in Kotlin in `app`; Kotlin/JVM plugin in `:ix`) |
 | compileSdk / targetSdk | 37 |
-| minSdk | 29 upstream; proposed 31 for suite parity |
+| minSdk | 31 (upstream 29; one-line divergence) |
 | Build tools | 37.0.0 |
 | NDK | 29.0.14206865 (declared; no native code yet) |
 | JDK | 17 toolchain; CI uses 21 |
