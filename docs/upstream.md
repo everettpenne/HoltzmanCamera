@@ -101,7 +101,7 @@ These are the upstream files the fork is expected to touch. Keep the list short,
 | `app/src/main/AndroidManifest.xml` | Label/category/description, shortcuts meta-data, user-build intent removal | Medium (upstream changes intents) |
 | `app/src/main/java/app/grapheneos/camera/CamConfig.kt` | Mode list, capture builder (output format, manual interop), settings keys | **High** (active file) |
 | `app/src/main/java/app/grapheneos/camera/capturer/ImageCapturer.kt` | Choose saver path, pass style/output options | Medium |
-| `app/src/main/java/app/grapheneos/camera/capturer/ImageSaver.kt` | RAW/Ultra HDR bytes, style application, Sietch handoff | **High** |
+| `app/src/main/java/app/grapheneos/camera/capturer/ImageSaver.kt` | Debug Ix pass (D0.7), later RAW/Ultra HDR bytes, style application, Sietch handoff | **High** |
 | `app/src/main/java/app/grapheneos/camera/ui/activities/MainActivity.kt` | Mode entry points, manual panel wiring | Medium–high |
 | `app/src/main/java/app/grapheneos/camera/ui/SettingsDialog.kt` | Manual/style/RAW settings rows | Medium |
 | `app/src/main/res/values/strings.xml`, `colors.xml`, `themes.xml`, `dimens.xml` | Glass token parity | Low (prefer overlay) |

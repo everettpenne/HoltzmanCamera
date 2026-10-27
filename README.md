@@ -2,7 +2,7 @@
 
 A camera for the [Glass](https://github.com/everettpenne/Glass) suite, forked from [GrapheneOS Camera](https://github.com/GrapheneOS/Camera) (MIT). Its imaging engine is **Ix**.
 
-**Status: planning + Ix skeleton and adapter.** The `:ix` module contains the engine contract, colour/style maths, naming, warnings and a pass-through implementation with 27 JVM tests. The app-side adapter (`IxSources`, `IxWriter`, `IxPipeline`) converts CameraX/`Bitmap`/`Uri` inputs, writes files to MediaStore or SAF, and has three instrumented tests passing on an API 36 emulator. The camera UI and capture policy are still upstream; no camera feature has been changed yet.
+**Status: planning + Ix skeleton, adapter and debug hook.** The `:ix` module contains the engine contract, colour/style maths, naming, warnings and a pass-through implementation with 27 JVM tests. The app-side adapter (`IxSources`, `IxWriter`, `IxPipeline`) converts CameraX/`Bitmap`/`Uri` inputs and writes files to MediaStore or SAF. In **debug builds only**, the finished JPEG takes one fail-open pass through Ix before upstream writes it; release builds never enter the hook. Four instrumented tests pass on an API 36 emulator. The camera UI and capture policy are still upstream; no camera feature has been changed yet.
 
 The fork keeps GrapheneOS Camera's camera core and adds the things the suite needs: manual controls, RAW/DNG, Ultra HDR, photographic styles, a one-tap handoff to Sietch, and the metadata and shortcuts that make it a first-class app in Uno Launcher.
 

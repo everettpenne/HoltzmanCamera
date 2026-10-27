@@ -13,16 +13,20 @@ import android.system.Os
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.Px
+import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.internal.compat.workaround.ExifRotationAvailability
 import androidx.camera.core.internal.utils.ImageUtil
 import androidxc.camera.core.impl.utils.Exif
+import app.grapheneos.camera.BuildConfig
 import app.grapheneos.camera.CamConfig
 import app.grapheneos.camera.CapturedItem
 import app.grapheneos.camera.IMAGE_NAME_PREFIX
 import app.grapheneos.camera.ITEM_TYPE_IMAGE
+import app.grapheneos.camera.suite.ix.IxJpegDebug
+import com.everettpenne.ix.IxLensFacing
 import app.grapheneos.camera.capturer.ImageSaverException.Place
 import app.grapheneos.camera.clearExif
 import app.grapheneos.camera.fixExif
@@ -81,6 +85,8 @@ class ImageSaver(
     }
 
     override fun onCaptureSuccess(image: ImageProxy) {
+        sourceWidth = image.width
+        sourceHeight = image.height
         mainThreadExecutor.execute(imageCapturer::onCaptureSuccess)
 
         try {
@@ -158,6 +164,9 @@ class ImageSaver(
     private lateinit var processedJpegBytes: ByteArray
     private var shouldUseExifOrientation = false
     private var orientation = 0
+    /** Full captured dimensions, kept for the debug Ix pass; the preview size is not enough. */
+    private var sourceWidth = 0
+    private var sourceHeight = 0
 
     @Throws(ImageSaverException::class)
     private fun saveImageInner(): CapturedItem {
@@ -177,6 +186,24 @@ class ImageSaver(
         }
 
         processedJpegBytes = processExif(uncroppedJpegBytes)
+
+        // Debug-only experiment: pass the finished JPEG through Ix before the normal write. The
+        // hook is fail-open, and release builds never enter it.
+        if (BuildConfig.DEBUG) {
+            val viaIx = IxJpegDebug.render(
+                jpeg = processedJpegBytes,
+                width = sourceWidth,
+                height = sourceHeight,
+                orientationDegrees = orientation,
+                lensFacing = if (imageCapturer.camConfig.lensFacing == CameraSelector.LENS_FACING_FRONT) {
+                    IxLensFacing.FRONT
+                } else {
+                    IxLensFacing.BACK
+                },
+                timestampMillis = captureTime.time,
+            )
+            if (viaIx != null) processedJpegBytes = viaIx
+        }
 
         val startOfWriting = timestamp()
 

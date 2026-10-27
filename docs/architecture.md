@@ -65,13 +65,13 @@ The build-file cost is small and deliberate: `settings.gradle.kts` (`include(":i
 ```
 CameraX bind (Preview + ImageCapture [+ VideoCapture])
   → ImageCapture (JPEG)
-  → [Ix style/format stage, when enabled]
+  → ImageSaver: EXIF, then [debug-only Ix pass through IxJpegDebug]
   → IxResult (bytes + metadata)
-  → ImageSaver / handoff (MediaStore or SAF)
+  → normal write (MediaStore or SAF)
   → thumbnail / last-shot preview
 ```
 
-With no style and JPEG output, this is upstream's path untouched. Ix only enters when the user selects a style, RAW, Ultra HDR or another output format.
+Debug builds pass the finished JPEG through `IxJpegDebug` before the write; it is fail-open, so any Ix error leaves upstream's bytes in place. Release builds take upstream's path untouched. This is the D0.7 experiment; the real style/format stage arrives with D4/D5.
 
 ### Manual
 

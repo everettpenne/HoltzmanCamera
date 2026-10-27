@@ -8,9 +8,12 @@ import com.everettpenne.ix.IxCaptureInfo
 import com.everettpenne.ix.IxOutput
 import com.everettpenne.ix.IxStyle
 import com.everettpenne.ix.IxStylePreset
+import com.everettpenne.ix.IxLensFacing
 import com.everettpenne.ix.IxWarning
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,6 +69,32 @@ class IxAdapterInstrumentedTest {
             assertEquals("IMG_test.jpg", result.written.single().file.name)
         } finally {
             context.contentResolver.delete(uri, null, null)
+        }
+    }
+
+    @Test
+    fun theDebugHookIsFailOpenAndReturnsTheJpeg() {
+        val bitmap = Bitmap.createBitmap(8, 8, Bitmap.Config.ARGB_8888).apply { eraseColor(Color.BLUE) }
+        val source = IxSources.fromBitmap(bitmap)
+        bitmap.recycle()
+
+        IxJpegDebug.enabled = true
+        try {
+            val viaIx = IxJpegDebug.render(
+                jpeg = source.bytes,
+                width = source.width,
+                height = source.height,
+                orientationDegrees = 0,
+                lensFacing = IxLensFacing.BACK,
+                timestampMillis = 0L,
+            )
+            assertNotNull(viaIx)
+            assertArrayEquals(source.bytes, viaIx)
+
+            IxJpegDebug.enabled = false
+            assertNull(IxJpegDebug.render(source.bytes, source.width, source.height, 0, IxLensFacing.BACK, 0L))
+        } finally {
+            IxJpegDebug.enabled = true
         }
     }
 

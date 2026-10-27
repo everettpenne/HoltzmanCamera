@@ -72,7 +72,9 @@ The contract is deliberately narrow: **bytes in, files out, warnings in the resu
 
 **Skeleton status (2026-10-27):** `PassThroughIxEngine` implements the contract without decoding: it passes JPEG, DNG and Ultra HDR bytes through, reports style requests as `StyleSkipped`, and refuses RAW→JPEG. `IxStyleRenderer` already applies the style matrices to an ARGB buffer. 27 JVM tests cover the model, colour maths, presets, naming and pass-through behaviour. It is a contract scaffold, **not** Ix 1; the real encoders and style stage replace it before release.
 
-**Adapter (2026-10-27):** the app module now has `suite/ix/IxSources` (`ImageProxy`, `Bitmap`, `Uri` → `IxSource`), `IxWriter` (`IxFile` → MediaStore or SAF, with `IS_PENDING` and cleanup) and `IxPipeline` (source → engine → files). Three instrumented tests pass on the API 36 emulator: Bitmap → Ix → MediaStore → read back, a skipped style still writes the file, and JPEG padding is trimmed. The capture path is not switched over yet; that is D4/D5.
+**Adapter (2026-10-27):** the app module now has `suite/ix/IxSources` (`ImageProxy`, `Bitmap`, `Uri` → `IxSource`), `IxWriter` (`IxFile` → MediaStore or SAF, with `IS_PENDING` and cleanup) and `IxPipeline` (source → engine → files). Four instrumented tests pass on the API 36 emulator: Bitmap → Ix → MediaStore → read back, a skipped style still writes the file, the debug hook is fail-open and byte-identical for pass-through, and JPEG padding is trimmed.
+
+**Debug JPEG hook (2026-10-27):** `ImageSaver` passes its finished JPEG through `IxJpegDebug` **only when `BuildConfig.DEBUG`**. `IxJpegDebug` returns the original bytes on any exception, empty result or non-JPEG output. Release builds skip the block entirely. This is the first real capture-path use of the engine; RAW/Ultra HDR and styles remain D4/D5.
 
 ## 5. Pipeline
 
