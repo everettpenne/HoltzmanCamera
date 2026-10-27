@@ -143,35 +143,35 @@ Holtzman/
 
 ## 7. Toolchain
 
-Upstream needs a newer toolchain than the other suite apps. Current machine state:
+Upstream needs a newer toolchain than the other suite apps:
 
-| Requirement | Current state | Action |
-| --- | --- | --- |
-| JDK 17 full JDK | Provisioned locally at `../.tools/jdk17/Contents/Home` (Temurin 17.0.21 arm64); JDK 21 runs Gradle | pass it with `-Porg.gradle.java.installations.paths=...` or install it in a standard location |
-| Android platform 37 | installed in the workspace SDK (`../android-sdk`) | none |
-| Build-tools 37.0.0 | installed in the workspace SDK | none |
-| NDK 29.0.14206865 | absent | not needed for the current app build; install it when native code lands |
-| Gradle 9.8.2 | wrapper uses it | use a writable `GRADLE_USER_HOME` (the sandbox blocks `~/.gradle`) |
-| Android SDK home | `~/.android` is not writable | set `ANDROID_USER_HOME` to a writable path so the debug keystore can be created |
-| `local.properties` | created in this checkout; points at `../android-sdk` | git-ignored; change it if you use another SDK |
+| Requirement | Notes |
+| --- | --- |
+| JDK 17 full JDK | Required as a Gradle toolchain; a newer JDK may run Gradle |
+| Android platform 37 | `sdkmanager "platforms;android-37.0"` if missing |
+| Build-tools 37.0.0 | `sdkmanager "build-tools;37.0.0"` if missing; the app build needs it |
+| NDK 29.0.14206865 | Not needed for the current app build; install it when native code lands |
+| Gradle 9.8.2 | The wrapper downloads it; use a writable `GRADLE_USER_HOME` |
+| Android SDK home | Set `ANDROID_USER_HOME` to a writable path if `~/.android` is not writable (the debug keystore lives there) |
+| `local.properties` | Create with `sdk.dir=...`; it is git-ignored |
 
 The engine builds and tests without the Android SDK:
 
 ```bash
-JAVA_HOME=/Users/everettpenne/Library/Java/JavaVirtualMachines/jbr-21.0.11/Contents/Home \
-GRADLE_USER_HOME=/Users/everettpenne/Code/gradle-home \
+JAVA_HOME=/path/to/jdk-21 \
+GRADLE_USER_HOME=/path/to/gradle-home \
   ./gradlew :ix:test \
-  -Porg.gradle.java.installations.paths=/Users/everettpenne/Code/.tools/jdk17/Contents/Home
+  -Porg.gradle.java.installations.paths=/path/to/jdk-17
 ```
 
-The app build additionally needs build-tools 37, the JDK 17 toolchain and a writable Android home (the debug keystore lives there):
+The app build additionally needs build-tools 37, the JDK 17 toolchain and a writable Android home:
 
 ```bash
-ANDROID_USER_HOME=/Users/everettpenne/Code/android-sdk/.android \
-JAVA_HOME=/Users/everettpenne/Library/Java/JavaVirtualMachines/jbr-21.0.11/Contents/Home \
-GRADLE_USER_HOME=/Users/everettpenne/Code/gradle-home \
+ANDROID_USER_HOME=/path/to/writable-android-home \
+JAVA_HOME=/path/to/jdk-21 \
+GRADLE_USER_HOME=/path/to/gradle-home \
   ./gradlew :app:assembleDebug \
-  -Porg.gradle.java.installations.paths=/Users/everettpenne/Code/.tools/jdk17/Contents/Home
+  -Porg.gradle.java.installations.paths=/path/to/jdk-17
 ```
 
 **Verified on 2026-10-27:** `:ix:test` (27 tests), `:app:assembleDebug`, `:app:assembleDebugAndroidTest`, and the 4 `IxAdapterInstrumentedTest` tests on an API 36 emulator.
