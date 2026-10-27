@@ -11,6 +11,7 @@ The fork keeps GrapheneOS Camera's camera core and adds the things the suite nee
 - [Ix engine](docs/ix.md) — what the imaging engine owns and why
 - [Upstream strategy](docs/upstream.md) — branches, sync runbook, conflict policy
 - [Suite integration](docs/integration.md) — Uno and Sietch contracts
+- [Test builds and releases](docs/release.md) — what can be published now, and the gates for a public release
 - [Decisions](docs/decisions.md) — the choices made so far
 
 ## Relationship to upstream

@@ -216,7 +216,7 @@ The full runbook is in [docs/upstream.md](docs/upstream.md). The rules:
 5. **Sietch handoff.** Recommended: explicit `ACTION_SEND` to Sietch with a remembered folder, plus the existing SAF storage location for zero-friction direct saves. Both.
 6. **minSdk.** Upstream is 29; the suite is 31. Recommended: raise to 31 (GrapheneOS targets Android 12+), one-line divergence. Decide in D1.
 7. **System flavor.** A future `system` build could keep the system-camera intents for a GrapheneOS ROM integration. Not in v1.
-8. **Distribution.** GitHub releases initially; Gradle/CI signing comes later. Do not commit keys.
+8. **Distribution.** GitHub releases initially; see [test builds and releases](docs/release.md) for the debug-pre-release vs signed-alpha path. Do not commit keys.
 
 ## 11. Working agreements
 
