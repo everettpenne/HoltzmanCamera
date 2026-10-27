@@ -1,0 +1,8 @@
+repo = https://github.com/GrapheneOS/Camera.git
+branch = main
+base_commit = 0aa4cb0dccf7f32919a35a431771cec67716dd7e
+base_date = 2026-10-23
+base_version_code = 94
+synced = 2026-10-27
+fork_branch = main
+notes = Fork base. Update this file and the log in docs/upstream.md on every sync.
