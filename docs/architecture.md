@@ -43,17 +43,20 @@ App-side code goes under `app/src/main/java/app/grapheneos/camera/suite/`:
 
 ```
 suite/
-├── ix/          # adapter: ImageProxy/Bitmap -> IxSource, IxFile -> MediaStore/SAF
+├── ix/          # adapter
+│   ├── IxSources.kt    # ImageProxy / Bitmap / Uri -> IxSource
+│   ├── IxWriter.kt     # IxFile -> MediaStore or SAF, pending + cleanup
+│   └── IxPipeline.kt   # source -> engine -> files, one blocking call
 ├── manual/      # ManualState, sensor ranges, Camera2 interop, auto<->manual transitions
 ├── handoff/     # Sietch intent, FileProvider URIs, MediaStore/SAF helpers
 └── uno/         # deep links, shortcut routing, Live Update
 ```
 
-**Ix** is the engine that owns the image: bytes in, files and warnings out. Its contract and internal layout are in [ix.md](ix.md). It has no `Context`, `Uri` or UI types; the app decides where the bytes go. The module boundary is compile-time enforcement, not just documentation.
+**Ix** is the engine that owns the image: bytes in, files and warnings out. Its contract and internal layout are in [ix.md](ix.md). It has no `Context`, `Uri` or UI types; the app decides where the bytes go. The module boundary is compile-time enforcement, not just documentation. The adapter is the only code that knows both worlds; it is blocking and annotated `@WorkerThread`.
 
 Plus new resources (`res/values/suite_colors.xml`, `suite_themes.xml`, `suite_strings.xml`, `res/layout/suite_*.xml`, `res/font/inter_variable.ttf`) and a `user` source-set overlay for the build without system-camera intents.
 
-The build-file cost is small and deliberate: `settings.gradle.kts` (`include(":ix")`), `app/build.gradle.kts` (`implementation(project(":ix"))`), `gradle/libs.versions.toml` (JUnit, JVM plugin alias) and 32 lines of dependency-verification metadata for the Kotlin JVM plugin. No Android dependency is added to the engine.
+The build-file cost is small and deliberate: `settings.gradle.kts` (`include(":ix")`), `app/build.gradle.kts` (`implementation(project(":ix"))`), `gradle/libs.versions.toml` (JUnit) and 32 lines of dependency-verification metadata for the Kotlin JVM plugin. No Android dependency is added to the engine.
 
 ## 3. Capture pipeline
 
@@ -191,7 +194,7 @@ Never add `INTERNET`. Never add storage permissions; use MediaStore/SAF. Strip E
 ## 9. Testing
 
 - **JVM tests:** `ix/src/test/` covers the engine (model, colour maths, presets, naming, pass-through). `app/src/test/` is added later for manual range/step clamping, deep-link parsing and share-intent construction.
-- **Instrumented tests** (existing `app/src/androidTest/`): shortcuts resolve to the right mode, permissions flow, save to MediaStore, Sietch intent targets the package, Live Update starts/stops.
+- **Instrumented tests** (existing `app/src/androidTest/`): the Ix adapter writes a Bitmap through MediaStore and reads it back; shortcuts resolve to the right mode, permissions flow, save to MediaStore, Sietch intent targets the package, Live Update starts/stops.
 - **Device checklist** (Pixel, current GrapheneOS): every mode, manual changes, DNG opens elsewhere, Ultra HDR on/off, styles, EXIF, 30-minute thermal run, Sietch handoff, Uno shortcuts and island action.
 - **Emulator** is for UI/intents only. It cannot validate focus, HDR, thermal or image quality.
 

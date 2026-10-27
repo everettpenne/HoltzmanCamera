@@ -1,7 +1,7 @@
 # Holtzman Camera — project outline
 
 **Product:** Holtzman Camera. **Imaging engine:** Ix. **Package:** `com.everettpenne.holtzman`.
-**Status:** planning; D0 and the D0.5 Ix skeleton are done. **Base:** GrapheneOS Camera `main` at `0aa4cb0` (2026-10-23, versionCode 94), recorded in [`UPSTREAM`](UPSTREAM).
+**Status:** planning; D0, the D0.5 Ix skeleton and the D0.6 adapter are done. **Base:** GrapheneOS Camera `main` at `0aa4cb0` (2026-10-23, versionCode 94), recorded in [`UPSTREAM`](UPSTREAM).
 **Licence:** MIT, upstream copyright preserved.
 
 > The name is chosen: **Holtzman Camera**, with **Ix** as the imaging engine. The application ID is reserved as `com.everettpenne.holtzman`; it can still change before the first public release, but not after — that would orphan installed data. See [the naming decisions](docs/decisions.md).
@@ -61,6 +61,7 @@ Estimates are for one developer, including tests and a device pass. D3/D4/D5 can
 | --- | --- | --- | --- | --- | --- |
 | **D0** | **Fork, docs and sync baseline** | Upstream clone, `upstream` remote, `UPSTREAM`, project outline, architecture, upstream runbook, decisions | — | Docs exist; base commit recorded; `git fetch upstream` works | done |
 | **D0.5** | **Ix skeleton** | Pure `:ix` JVM module: contract, colour/style maths, naming, warnings, pass-through engine; 27 JVM tests | D0 | `:ix:test` green; no Android imports; verification metadata updated | done |
+| **D0.6** | **Ix adapter** | `IxSources` (`ImageProxy`/`Bitmap`/`Uri`), `IxWriter` (MediaStore/SAF, pending and cleanup), `IxPipeline`; instrumented adapter test | D0.5 | app and `debugAndroidTest` compile; adapter has no new permissions; 3 instrumented tests pass on the API 36 emulator | done |
 | **D1** | **Buildable, rebranded fork** | `applicationId`, label, icon, About ("Holtzman Camera · Ix engine", upstream credit); Glass token layer (colours, Inter, corners, haptics); remove system-camera intents; CI builds | D0 | `:app:assembleDebug` green; installs beside GrapheneOS Camera; no system intents; About names Ix and credits upstream | 3–5 d |
 | **D2** | **v1 camera core** | Upstream features retained (photo, video, QR, Night where available); 4:3 default; tap focus/meter; volume shutter; MediaStore + SAF save; EXIF strip default; shortcuts and deep links; category/description | D1 | Photo/video save and appear in Gallery/Uno; shortcuts open the right mode; no permission beyond CAMERA (+ optional MIC/location) | 1–2 w |
 | **D3** | **Manual controls** | Shutter, ISO, focus and WB panels; sensor ranges from `CameraCharacteristics`; auto/manual switch; live histogram; ZSL and extensions disabled while manual; restore on exit | D2 | Each control visibly changes the capture; ranges are the device's; auto restores cleanly; JVM tests for range/step logic | 2–3 w |
@@ -70,7 +71,7 @@ Estimates are for one developer, including tests and a device pass. D3/D4/D5 can
 | **D7** | **Uno integration** | Category `image`, description; shortcuts Photo/Selfie/Manual/Scan; deep links; processing Live Update; Uno island quick action, control-panel tile, search action; optional camera widget | D5, D6 | Long-press shows shortcuts; island action opens a mode; Live Update shows and clears; Photos widget sees new files | 1–2 w |
 | **D8** | **Hardening and v1 release** | JVM tests, instrumented intent tests, device checklist, thermal/battery pass, accessibility, privacy audit, release notes, signed APK | all | Checklist signed off; no ANRs over a 30-minute burst; permissions audited; release notes name the upstream base and the Ix version | 1–2 w |
 
-**v1.0 = D1–D8**, on top of the finished D0.5 skeleton. Internal previews (`v0.1`, `v0.2`, `v0.3`) follow D2, D4 and D6 so the camera is usable and testable before the full set lands.
+**v1.0 = D1–D8**, on top of the finished D0.5 skeleton and D0.6 adapter. Internal previews (`v0.1`, `v0.2`, `v0.3`) follow D2, D4 and D6 so the camera is usable and testable before the full set lands.
 
 ### Acceptance criteria, in plain language
 
@@ -172,7 +173,7 @@ GRADLE_USER_HOME=/Users/everettpenne/Code/gradle-home \
   -Porg.gradle.java.installations.paths=/Users/everettpenne/Code/.tools/jdk17/Contents/Home
 ```
 
-**Verified on 2026-10-27:** `:ix:test` (27 tests) and `:app:assembleDebug` both green with the commands above.
+**Verified on 2026-10-27:** `:ix:test` (27 tests), `:app:assembleDebug`, `:app:assembleDebugAndroidTest`, and the 3 `IxAdapterInstrumentedTest` tests on an API 36 emulator.
 
 **Read this before adding Glass:** the camera's AGP/Gradle/Kotlin are ahead of Glass's. A composite build of Glass will not work in v1. The plan is resource/token parity now, real Glass when Glass moves to AGP 9 (which the Glass README already anticipates for Backdrop 2.x).
 
