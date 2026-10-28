@@ -2,7 +2,7 @@
 
 Short answer:
 
-- **D1 is done**, and its debug build is published as [v0.1.0-test](https://github.com/everettpenne/HoltzmanCamera/releases/tag/v0.1.0-test). It installs as **Holtzman Camera d** (`com.everettpenne.holtzman.dev`), with the aperture icon, About page, Glass palette and the Ix JPEG hook.
+- **D2 is done**, and its debug build is published as [v0.2.0-test](https://github.com/everettpenne/HoltzmanCamera/releases/tag/v0.2.0-test). It installs as **Holtzman Camera d** (`com.everettpenne.holtzman.dev`), with the aperture icon, About page, Glass palette, the Ix JPEG hook and the four launcher/deep-link modes.
 - **A public release still waits.** The build is debug-signed, the Ix hook is debug-only by design, and there is no privacy page or signed release pipeline yet.
 
 ## Readiness
@@ -17,8 +17,9 @@ Short answer:
 | Holtzman branding | **done** | `com.everettpenne.holtzman` (debug `.dev`), label, aperture icon, About |
 | User-build manifest | **done** | No system-camera intents, no secure/lock-screen activities, no `DISABLE_KEYGUARD` |
 | Fixed Glass palette | **done** | Inter, dark ink/surface, amber accent, 8/16/24dp corners; Material You disabled |
+| Shortcuts and deep links | **done** | Photo · Selfie · Scan · Video; `holtzman://`; cold and `onNewIntent`; Manual joins in D3 |
 | Release signing | **not done** | No `keystore.properties`, no CI signing |
-| Version and release notes | debug `0.1.0` | `v0.1.0-test` note exists; signed release note pending |
+| Version and release notes | debug `0.2.0` | `v0.2.0-test` note exists; signed release note pending |
 | Privacy page | **not done** | Upstream has no `PRIVACY.md` |
 | Ix behaviour in release | **not yet** | Hook is debug-only until D4/D5 |
 | GitHub repository | **done** | Public `everettpenne/HoltzmanCamera`; CI green |
@@ -31,6 +32,7 @@ The APK at `app/build/outputs/apk/debug/app-debug.apk`:
 - debug-signed, debuggable
 - label "Holtzman Camera d"; aperture icon; About names Ix and credits upstream
 - fixed Glass palette, Inter, dark settings
+- Photo · Selfie · Scan · Video shortcuts and deep links
 - Ix JPEG hook active
 
 Build it with the documented toolchain, then either sideload it or attach it to a GitHub pre-release:
@@ -43,10 +45,10 @@ For a GitHub pre-release (do not commit the APK):
 
 ```bash
 git push origin main
-gh release create v0.1.0-test \
+gh release create v0.2.0-test \
   --prerelease \
-  --title "Holtzman Camera 0.1.0 test build" \
-  --notes-file docs/releases/0.1.0-test.md \
+  --title "Holtzman Camera 0.2.0 test build" \
+  --notes-file docs/releases/0.2.0-test.md \
   app/build/outputs/apk/debug/app-debug.apk \
   app/build/outputs/apk/debug/SHA256SUMS.txt
 ```
@@ -55,10 +57,10 @@ If `gh` asks for `workflow` scope on this repository, create the release through
 
 ```bash
 gh api -X POST repos/everettpenne/HoltzmanCamera/releases \
-  -f tag_name=v0.1.0-test -f target_commitish=main \
-  -f name="Holtzman Camera 0.1.0 test build" -F prerelease=true \
-  -f body="$(cat docs/releases/0.1.0-test.md)"
-gh release upload --repo everettpenne/HoltzmanCamera v0.1.0-test \
+  -f tag_name=v0.2.0-test -f target_commitish=main \
+  -f name="Holtzman Camera 0.2.0 test build" -F prerelease=true \
+  -f body="$(cat docs/releases/0.2.0-test.md)"
+gh release upload --repo everettpenne/HoltzmanCamera v0.2.0-test \
   app/build/outputs/apk/debug/app-debug.apk \
   app/build/outputs/apk/debug/SHA256SUMS.txt
 ```

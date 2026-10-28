@@ -49,6 +49,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
             android:screenOrientation="nosensor"
+            android:launchMode="singleTop"
             android:exported="true"
             android:theme="@style/Theme.Camera"
             tools:ignore="DiscouragedApi">
@@ -57,6 +58,13 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="holtzman"/>
             </intent-filter>
 
         </activity>

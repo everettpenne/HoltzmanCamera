@@ -239,6 +239,15 @@
     <string name="invalid_photo_quality_value">Invalid value set for photo quality</string>
 
     <string name="app_description">A camera for the Glass suite: photo, video, scan, manual, RAW and Ultra HDR.</string>
+    <string name="shortcut_photo">Photo</string>
+    <string name="shortcut_photo_long">Take a photo</string>
+    <string name="shortcut_selfie">Selfie</string>
+    <string name="shortcut_selfie_long">Open the front camera</string>
+    <string name="shortcut_scan">Scan</string>
+    <string name="shortcut_scan_long">Scan a QR code</string>
+    <string name="shortcut_video">Video</string>
+    <string name="shortcut_video_long">Record a video</string>
+
     <string name="about_holtzman">About Holtzman Camera</string>
     <string name="about_holtzman_text">Holtzman Camera %1$s\nIx %2$s\n\nA camera for the Glass suite.\nBased on GrapheneOS Camera (MIT): github.com/GrapheneOS/Camera\n\nManual controls, RAW and Ultra HDR are on the way.</string>
 </resources>

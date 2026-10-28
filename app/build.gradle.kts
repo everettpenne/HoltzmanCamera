@@ -48,8 +48,8 @@ android {
         applicationId = "com.everettpenne.holtzman"
         minSdk = 31
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -102,6 +102,8 @@ dependencies {
     implementation(libs.bundles.camerax)
 
     implementation(libs.zxing.core)
+
+    testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.test.core.ktx)
     androidTestImplementation(libs.androidx.test.ext.junit.ktx)

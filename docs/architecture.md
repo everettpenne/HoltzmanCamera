@@ -50,9 +50,14 @@ suite/
 ├── manual/      # ManualState, sensor ranges, Camera2 interop, auto<->manual transitions
 ├── handoff/     # Sietch intent, FileProvider URIs, MediaStore/SAF helpers
 └── uno/         # deep links, shortcut routing, Live Update
+    ├── HoltzmanLinks.kt      # pure parser: holtzman:// -> mode + lens
+    ├── HoltzmanShortcuts.kt  # four dynamic shortcuts, package-scoped
+    └── ...
 ```
 
 **Ix** is the engine that owns the image: bytes in, files and warnings out. Its contract and internal layout are in [ix.md](ix.md). It has no `Context`, `Uri` or UI types; the app decides where the bytes go. The module boundary is compile-time enforcement, not just documentation. The adapter is the only code that knows both worlds; it is blocking and annotated `@WorkerThread`.
+
+A shortcut/deep link is applied in `MainActivity.onCreate` **before** the first camera bind via `CamConfig.prepareMode()`, so a cold start lands directly in the requested mode. A delivery to an existing activity goes through `onNewIntent` and `switchMode()`; the intent data is cleared so the same shortcut works twice. `launchMode="singleTop"` keeps one camera activity, and the shortcut intents add `CLEAR_TOP | SINGLE_TOP` so tapping from Settings returns to it.
 
 Plus new resources (`res/values/holtzman.xml`, `themes.xml` overrides, `res/font/inter_variable.ttf`, the aperture icon, and `strings.xml` additions). The user build removes the system-camera activities and filters directly in `AndroidManifest.xml`; a source-set overlay remains the cleaner option once the `system` flavor exists (see ADR-009).
 
@@ -202,14 +207,14 @@ Upstream is Views; Glass is Compose and on an older toolchain. For v1:
 | `POST_NOTIFICATIONS` / `POST_PROMOTED_NOTIFICATIONS` | Live Update for saving/processing | Optional; no notifications otherwise |
 | `VIBRATE` | Haptics | No prompt |
 | `WAKE_LOCK` | Keep the screen/session during capture | No prompt |
-| `DISABLE_KEYGUARD` | Secure camera activities | Remove with the system intents in the user build |
+| `DISABLE_KEYGUARD` | Secure camera activities | Removed in D1 with the system intents |
 
 Never add `INTERNET`. Never add storage permissions; use MediaStore/SAF. Strip EXIF by default (upstream behaviour); location only if explicitly enabled. No analytics, no accounts, no cloud.
 
 ## 9. Testing
 
-- **JVM tests:** `ix/src/test/` covers the engine (model, colour maths, presets, naming, pass-through). `app/src/test/` is added later for manual range/step clamping, deep-link parsing and share-intent construction.
-- **Instrumented tests** (existing `app/src/androidTest/`): the Ix adapter writes a Bitmap through MediaStore and reads it back, the debug hook is fail-open, and JPEG padding is trimmed; shortcuts resolve to the right mode, permissions flow, save to MediaStore, Sietch intent targets the package, Live Update starts/stops.
+- **JVM tests:** `ix/src/test/` covers the engine (model, colour maths, presets, naming, pass-through); `app/src/test/` covers the deep-link parser (`HoltzmanLinksTest`, 5 tests). Manual range/step clamping and share-intent construction follow.
+- **Instrumented tests** (`app/src/androidTest/`): the Ix adapter writes a Bitmap through MediaStore and reads it back, the debug hook is fail-open, JPEG padding is trimmed, and the four dynamic shortcuts are published with package-scoped `VIEW` intents. Photo, Selfie, Scan and Video links were also checked on the emulator, cold and via `onNewIntent`.
 - **Device checklist** (Pixel, current GrapheneOS): every mode, manual changes, DNG opens elsewhere, Ultra HDR on/off, styles, EXIF, 30-minute thermal run, Sietch handoff, Uno shortcuts and island action.
 - **Emulator** is for UI/intents only. It cannot validate focus, HDR, thermal or image quality.
 

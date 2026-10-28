@@ -98,6 +98,8 @@ import app.grapheneos.camera.ui.showIgnoringShortEdgeMode
 import app.grapheneos.camera.util.CameraControl
 import app.grapheneos.camera.util.ImageResizer
 import app.grapheneos.camera.util.executeIfAlive
+import app.grapheneos.camera.suite.uno.HoltzmanLinks
+import app.grapheneos.camera.suite.uno.HoltzmanShortcuts
 import app.grapheneos.camera.util.resolveActivity
 import app.grapheneos.camera.util.setBlurBitmapCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -1133,6 +1135,41 @@ open class MainActivity : AppCompatActivity(),
                 showMessage(R.string.video_audio_recording_muted)
             }
         }
+
+        HoltzmanShortcuts.publish(this)
+
+        // A shortcut/deep link is applied before the first bind (onResume initializes the camera),
+        // so the first camera sees the requested mode instead of rebinding from the default.
+        if (savedInstanceState == null) {
+            applyDestination(intent, initial = true)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        applyDestination(intent, initial = false)
+    }
+
+    private fun applyDestination(intent: Intent?, initial: Boolean) {
+        val destination = HoltzmanLinks.parse(intent?.data?.toString()) ?: return
+
+        if (initial) {
+            camConfig.prepareMode(destination.mode, destination.lensFacing)
+        } else {
+            val lensChanged = camConfig.lensFacing != destination.lensFacing
+            if (camConfig.currentMode != destination.mode) {
+                camConfig.lensFacing = destination.lensFacing
+                camConfig.switchMode(destination.mode)
+            } else if (lensChanged) {
+                camConfig.lensFacing = destination.lensFacing
+                camConfig.startCamera(true)
+            }
+        }
+
+        // Clear it so the same shortcut works twice: a singleTop activity would otherwise keep the
+        // old data and ignore the next delivery.
+        intent?.data = null
     }
 
     private fun repositionTabLayout() {

@@ -2198,7 +2198,13 @@ class CamConfig(private val mActivity: MainActivity) {
         }
     }
 
-    fun switchMode(mode: CameraMode) {
+    /**
+     * Applies a mode's state and chrome without starting the camera. Used by a shortcut or deep
+     * link before the first bind, when there is no camera provider to rebind yet.
+     */
+    fun prepareMode(mode: CameraMode, facing: Int? = null) {
+        facing?.let { lensFacing = it }
+
         if (currentMode == mode) {
             return
         }
@@ -2211,6 +2217,12 @@ class CamConfig(private val mActivity: MainActivity) {
 
         isVideoMode = mode == CameraMode.VIDEO
 
+        applyModeChrome()
+
+        mActivity.updateSelfTimerBadge()
+    }
+
+    private fun applyModeChrome() {
         if (isQRMode) {
             mActivity.qrOverlay.visibility = View.VISIBLE
             mActivity.thirdOption.visibility = View.INVISIBLE
@@ -2251,8 +2263,14 @@ class CamConfig(private val mActivity: MainActivity) {
                 mActivity.micOffIcon.visibility = View.GONE
             }
         }
+    }
 
-        mActivity.updateSelfTimerBadge()
+    fun switchMode(mode: CameraMode) {
+        if (currentMode == mode) {
+            return
+        }
+
+        prepareMode(mode)
 
         startCamera(true)
 

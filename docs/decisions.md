@@ -165,3 +165,15 @@ Upstream calls `DynamicColors.applyToActivitiesIfAvailable` and wraps the settin
 **Decision:** Holtzman disables dynamic colour. `Theme.Camera` and `Theme.App` use the fixed ink/surface/amber palette in `values/holtzman.xml`, Inter, and the 8/16/24dp corner scale. The settings dialog uses `Theme.SettingsDialog` directly.
 
 **Consequences:** the camera keeps the suite identity on every wallpaper and theme setting. There is no per-user Material You tint; a future Glass theme system can provide deliberate variants instead. This is a small upstream edit in `App.kt` and `MainActivity.kt`, recorded in the hot-file list.
+
+---
+
+## ADR-015 — Dynamic shortcuts, not static shortcuts.xml
+
+**Status:** accepted (2026-10-27).
+
+A static launcher shortcut's `<intent>` needs a target package. Holtzman has two installed packages — `com.everettpenne.holtzman` and the debug `.dev` — so a single `shortcuts.xml` would point at the wrong one in one variant.
+
+**Decision:** publish four **dynamic** shortcuts from `HoltzmanShortcuts` with `packageName`-scoped `VIEW` intents (`photo`, `selfie`, `scan`, `video`). The launcher reads them through `ShortcutManager`, and Uno's `AppShortcuts` does the same. Manual joins the set in D3, replacing Video if the four-shortcut limit bites.
+
+**Consequences:** shortcuts appear after the app has been opened once, not immediately on install; a launcher without shortcut support shows none. The intents carry `CLEAR_TOP | SINGLE_TOP`, and `MainActivity` is `singleTop`, so a warm delivery goes through `onNewIntent` instead of stacking camera activities.

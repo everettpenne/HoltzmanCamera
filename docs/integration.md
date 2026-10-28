@@ -10,12 +10,12 @@ The camera is only half the feature. This document is the contract between the c
 | --- | --- | --- |
 | `android:category` | `image` (Uno's App Library files it under Images) | done in D1 |
 | `android:description` | "A camera for the Glass suite: photo, video, scan, manual, RAW and Ultra HDR." | done in D1 |
-| Shortcuts | Photo · Selfie · Manual · Scan | D7 |
-| Deep links | `holtzman://photo`, `holtzman://selfie`, `holtzman://manual`, `holtzman://scan`, `holtzman://video` | D7 |
+| Shortcuts | Photo · Selfie · Scan · Video (dynamic; Manual joins in D3) | done in D2 |
+| Deep links | `holtzman://photo`, `holtzman://selfie`, `holtzman://scan`, `holtzman://video` (`manual` in D3) | done in D2 |
 | Live Update | While saving a RAW/Ultra HDR/style job: short text plus progress; cleared when done | D7 |
 | Widget (stretch) | Photo / Selfie / Manual / Scan buttons and the last shot; RemoteViews cannot host a live preview | not in v1 |
 
-Shortcuts are manifest shortcuts with explicit `android:data` URIs, the same pattern Spice, Thumper and Sietch already use. The launcher activity reads the data and selects the mode; it clears the intent afterwards so the same shortcut works twice.
+The shortcuts are **dynamic**, not a static `shortcuts.xml`: a static intent needs a target package, and the debug build's package (`.dev`) differs from release. `HoltzmanShortcuts` builds package-scoped `VIEW` intents with `CLEAR_TOP | SINGLE_TOP` and publishes four of them on launch. `MainActivity` applies the data before the first camera bind (cold) or through `onNewIntent` (warm), then clears it so the same shortcut works twice. Dynamic shortcuts appear after the app has been opened once; a launcher that does not support them simply shows none.
 
 ### What Uno must add (separate repository)
 
