@@ -177,3 +177,13 @@ A static launcher shortcut's `<intent>` needs a target package. Holtzman has two
 **Decision:** publish four **dynamic** shortcuts from `HoltzmanShortcuts` with `packageName`-scoped `VIEW` intents (`photo`, `selfie`, `scan`, `video`). The launcher reads them through `ShortcutManager`, and Uno's `AppShortcuts` does the same. Manual joins the set in D3, replacing Video if the four-shortcut limit bites.
 
 **Consequences:** shortcuts appear after the app has been opened once, not immediately on install; a launcher without shortcut support shows none. The intents carry `CLEAR_TOP | SINGLE_TOP`, and `MainActivity` is `singleTop`, so a warm delivery goes through `onNewIntent` instead of stacking camera activities.
+
+---
+
+## ADR-016 — Manual controls use Camera2 interop, in the normal camera
+
+**Status:** accepted (2026-10-27).
+
+Manual is a `CameraMode` and a panel, not a second activity. `ManualController` attaches to the bound `Camera` after every bind and applies `CaptureRequestOptions` through `Camera2CameraControl`: AE off with ISO/exposure, AF off with focus distance, and AWB off with approximate gains. Auto clears the options; any slider re-enters manual. ZSL is disabled while manual.
+
+**Consequences:** there is one viewfinder and one save path to maintain. A non-Camera2 camera or a vendor that rejects interop leaves the panel inert and the camera in auto; a separate Camera2 activity remains the fallback if a device proves this unusable. White balance is an approximation until calibrated on a device. The panel is native Views, so it inherits the Glass palette without a second UI stack.

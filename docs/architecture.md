@@ -47,7 +47,9 @@ suite/
 │   ├── IxSources.kt    # ImageProxy / Bitmap / Uri -> IxSource
 │   ├── IxWriter.kt     # IxFile -> MediaStore or SAF, pending + cleanup
 │   └── IxPipeline.kt   # source -> engine -> files, one blocking call
-├── manual/      # ManualState, sensor ranges, Camera2 interop, auto<->manual transitions
+├── manual/      # ManualMath, ranges/state, Camera2CameraControl interop
+│   ├── ManualMath.kt       # slider maths, labels, approximate WB gains
+│   └── ManualController.kt # attach to Camera2 control, apply/clear options
 ├── handoff/     # Sietch intent, FileProvider URIs, MediaStore/SAF helpers
 └── uno/         # deep links, shortcut routing, Live Update
     ├── HoltzmanLinks.kt      # pure parser: holtzman:// -> mode + lens
@@ -61,7 +63,19 @@ A shortcut/deep link is applied in `MainActivity.onCreate` **before** the first 
 
 Plus new resources (`res/values/holtzman.xml`, `themes.xml` overrides, `res/font/inter_variable.ttf`, the aperture icon, and `strings.xml` additions). The user build removes the system-camera activities and filters directly in `AndroidManifest.xml`; a source-set overlay remains the cleaner option once the `system` flavor exists (see ADR-009).
 
-### 2.1 Identity and theme
+### 2.1 Manual mode
+
+Manual is a normal camera mode (`CameraMode.MANUAL`), not a separate activity. On entry `CamConfig` shows the manual panel and keeps the camera bound; `ManualController` attaches to the current `Camera` after every bind and applies a `CaptureRequestOptions` set:
+
+- `CONTROL_AE_MODE_OFF`, `SENSOR_SENSITIVITY`, `SENSOR_EXPOSURE_TIME`
+- `CONTROL_AF_MODE_OFF`, `LENS_FOCUS_DISTANCE` when the lens has a focus range
+- `CONTROL_AWB_MODE_OFF`, `COLOR_CORRECTION_MODE_TRANSFORM_MATRIX` and approximate `COLOR_CORRECTION_GAINS` when AWB-off is advertised
+
+ISO and exposure use logarithmic sliders over the device's advertised ranges; focus is linear in dioptres (∞ at zero). **Auto** clears the options, and any slider moves back into manual. ZSL is disabled in Manual mode because it cannot combine with fixed exposure. Leaving Manual clears the options before the next bind.
+
+If the camera is not a Camera2 implementation, `ManualController.attach` leaves the panel inert with "Manual controls are unavailable"; the camera still captures in auto. The white-balance gains are an approximation and should be calibrated on a real device before the mode is described as colour-accurate.
+
+### 2.2 Identity and theme
 
 | Item | Value |
 | --- | --- |
@@ -98,7 +112,7 @@ Debug builds pass the finished JPEG through `IxJpegDebug` before the write; it i
 ```
 Manual panel (sliders + Auto)
   → ManualState (validated ranges)
-  → Camera2CameraControl.addCaptureRequestOptions(
+  → Camera2CameraControl.setCaptureRequestOptions(
         CONTROL_AE_MODE_OFF, SENSOR_EXPOSURE_TIME, SENSOR_SENSITIVITY,
         CONTROL_AWB_MODE_OFF, COLOR_CORRECTION_GAINS,
         CONTROL_AF_MODE_OFF, LENS_FOCUS_DISTANCE)
@@ -213,8 +227,8 @@ Never add `INTERNET`. Never add storage permissions; use MediaStore/SAF. Strip E
 
 ## 9. Testing
 
-- **JVM tests:** `ix/src/test/` covers the engine (model, colour maths, presets, naming, pass-through); `app/src/test/` covers the deep-link parser (`HoltzmanLinksTest`, 5 tests). Manual range/step clamping and share-intent construction follow.
-- **Instrumented tests** (`app/src/androidTest/`): the Ix adapter writes a Bitmap through MediaStore and reads it back, the debug hook is fail-open, JPEG padding is trimmed, and the four dynamic shortcuts are published with package-scoped `VIEW` intents. Photo, Selfie, Scan and Video links were also checked on the emulator, cold and via `onNewIntent`.
+- **JVM tests:** `ix/src/test/` covers the engine (model, colour maths, presets, naming, pass-through); `app/src/test/` covers the deep-link parser (`HoltzmanLinksTest`, 5 tests) and manual slider/label maths (`ManualMathTest`, 5 tests). Share-intent construction follows.
+- **Instrumented tests** (`app/src/androidTest/`): the Ix adapter writes a Bitmap through MediaStore and reads it back, the debug hook is fail-open, JPEG padding is trimmed, and the four dynamic shortcuts are published with package-scoped `VIEW` intents. Photo, Selfie, Scan, Video and Manual links were also checked on the emulator, cold and via `onNewIntent`; a manual capture applied the panel values.
 - **Device checklist** (Pixel, current GrapheneOS): every mode, manual changes, DNG opens elsewhere, Ultra HDR on/off, styles, EXIF, 30-minute thermal run, Sietch handoff, Uno shortcuts and island action.
 - **Emulator** is for UI/intents only. It cannot validate focus, HDR, thermal or image quality.
 

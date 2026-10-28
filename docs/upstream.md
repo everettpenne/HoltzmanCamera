@@ -99,7 +99,7 @@ These are the upstream files the fork is expected to touch. Keep the list short,
 | `gradle/verification-metadata.xml` | 32 lines for the Kotlin JVM plugin (Kotlin scripting artifacts). Do not regenerate the whole file; add only what the build reports missing | Low–medium (upstream Kotlin bumps also touch it) |
 | `ix/` | New pure JVM module; no upstream file is changed | None (new files) |
 | `app/src/main/AndroidManifest.xml` | Label/category/description, shortcuts meta-data, user-build intent removal | Medium (upstream changes intents) |
-| `app/src/main/java/app/grapheneos/camera/CamConfig.kt` | Mode list, capture builder (output format, manual interop), settings keys, `prepareMode()` for shortcuts | **High** (active file) |
+| `app/src/main/java/app/grapheneos/camera/CamConfig.kt` | Mode list (including Manual), capture builder, settings keys, `prepareMode()`, manual ZSL gate, `onCameraBound` | **High** (active file) |
 | `app/src/main/java/app/grapheneos/camera/capturer/ImageCapturer.kt` | Choose saver path, pass style/output options | Medium |
 | `app/src/main/java/app/grapheneos/camera/capturer/ImageSaver.kt` | Debug Ix pass (D0.7), later RAW/Ultra HDR bytes, style application, Sietch handoff | **High** |
 | `app/src/main/java/app/grapheneos/camera/ui/activities/MainActivity.kt` | Shortcut/deep-link routing, mode entry points, manual panel wiring, fixed settings-dialog theme | Medium–high |
@@ -109,7 +109,8 @@ These are the upstream files the fork is expected to touch. Keep the list short,
 | `app/src/main/res/values/strings.xml`, `colors.xml`, `themes.xml`, `dimens.xml` | Glass token parity | Low (prefer overlay) |
 | `app/src/main/res/values/holtzman.xml`, `res/font/inter_variable.ttf`, `res/drawable/ic_launcher_*`, `res/mipmap-anydpi*` | New Glass palette, Inter, aperture icon | None (new files) |
 | `app/src/main/java/.../suite/uno/`, `res/drawable/shortcut_*` | Dynamic shortcuts and deep-link parser | None (new files) |
-| `app/src/main/res/layout/*.xml` | New panels/controls | Low (new files preferred) |
+| `app/src/main/java/.../suite/manual/` | Manual ranges, slider maths, Camera2 interop controller | None (new files) |
+| `app/src/main/res/layout/activity_main.xml` | Manual panel insertion; future new panels | Medium |
 
 **Manifest removals:** D1 edited `AndroidManifest.xml` directly (filters and secure activities) and removed `DISABLE_KEYGUARD`. The helper classes stay. A `user` source-set overlay with `tools:node="remove"` is deferred until a `system` flavor exists; see [ADR-009](decisions.md#adr-009--remove-system-camera-intents-from-the-user-build).
 

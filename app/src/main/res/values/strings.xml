@@ -239,6 +239,18 @@
     <string name="invalid_photo_quality_value">Invalid value set for photo quality</string>
 
     <string name="app_description">A camera for the Glass suite: photo, video, scan, manual, RAW and Ultra HDR.</string>
+    <string name="manual">MANUAL</string>
+    <string name="manual_controls">Manual controls</string>
+    <string name="manual_auto">Auto</string>
+    <string name="manual_unavailable">Manual controls are unavailable on this camera.</string>
+    <string name="manual_waiting">Waiting for the camera…</string>
+    <string name="manual_shutter">Shutter</string>
+    <string name="manual_iso">ISO</string>
+    <string name="manual_focus">Focus</string>
+    <string name="manual_white_balance">White balance</string>
+    <string name="shortcut_manual">Manual</string>
+    <string name="shortcut_manual_long">Open manual controls</string>
+
     <string name="shortcut_photo">Photo</string>
     <string name="shortcut_photo_long">Take a photo</string>
     <string name="shortcut_selfie">Selfie</string>

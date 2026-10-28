@@ -10,12 +10,12 @@ The camera is only half the feature. This document is the contract between the c
 | --- | --- | --- |
 | `android:category` | `image` (Uno's App Library files it under Images) | done in D1 |
 | `android:description` | "A camera for the Glass suite: photo, video, scan, manual, RAW and Ultra HDR." | done in D1 |
-| Shortcuts | Photo · Selfie · Scan · Video (dynamic; Manual joins in D3) | done in D2 |
-| Deep links | `holtzman://photo`, `holtzman://selfie`, `holtzman://scan`, `holtzman://video` (`manual` in D3) | done in D2 |
+| Shortcuts | Photo · Selfie · Manual · Scan (dynamic) | done in D3 |
+| Deep links | `holtzman://photo`, `holtzman://selfie`, `holtzman://manual`, `holtzman://scan`, `holtzman://video` | done in D3 |
 | Live Update | While saving a RAW/Ultra HDR/style job: short text plus progress; cleared when done | D7 |
 | Widget (stretch) | Photo / Selfie / Manual / Scan buttons and the last shot; RemoteViews cannot host a live preview | not in v1 |
 
-The shortcuts are **dynamic**, not a static `shortcuts.xml`: a static intent needs a target package, and the debug build's package (`.dev`) differs from release. `HoltzmanShortcuts` builds package-scoped `VIEW` intents with `CLEAR_TOP | SINGLE_TOP` and publishes four of them on launch. `MainActivity` applies the data before the first camera bind (cold) or through `onNewIntent` (warm), then clears it so the same shortcut works twice. Dynamic shortcuts appear after the app has been opened once; a launcher that does not support them simply shows none.
+The shortcuts are **dynamic**, not a static `shortcuts.xml`: a static intent needs a target package, and the debug build's package (`.dev`) differs from release. `HoltzmanShortcuts` builds package-scoped `VIEW` intents with `CLEAR_TOP | SINGLE_TOP` and publishes four of them on launch: Photo, Selfie, Manual, Scan. `MainActivity` applies the data before the first camera bind (cold) or through `onNewIntent` (warm), then clears it so the same shortcut works twice. Video remains a valid deep link but has no shortcut slot. Dynamic shortcuts appear after the app has been opened once; a launcher that does not support them simply shows none.
 
 ### What Uno must add (separate repository)
 
@@ -25,7 +25,7 @@ The shortcuts are **dynamic**, not a static `shortcuts.xml`: a static intent nee
 | Control panel | `panel/ControlPanel.kt`, `panel/LiquidControls.kt` | A camera tile that opens the last-used mode |
 | Search | `search/UnoActions.kt` | "camera" / "scan" / "manual" typed actions open the deep link |
 | App Library | `search/AppLibrary.kt`, `search/AppCategories.kt` | Nothing to do: the manifest category and description are read automatically |
-| Long-press | `AppShortcuts.kt` | Nothing to do: manifest shortcuts are read automatically |
+| Long-press | `AppShortcuts.kt` | Nothing to do: dynamic shortcuts are read automatically |
 | Widget | `widgets/` or the camera app's own widget | Optional; prefer the camera app shipping its own, so Uno stays generic |
 | Live Update | `island/` | Nothing to do: promoted ongoing notifications are already rendered |
 

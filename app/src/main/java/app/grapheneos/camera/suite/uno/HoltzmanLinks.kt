@@ -8,7 +8,8 @@ import app.grapheneos.camera.CameraMode
  *
  * Pure data: the parser takes a string so it can be covered by app-side JVM tests, and the
  * manifest filter is deliberately only `holtzman://`; this object decides which hosts exist.
- * `manual` is added when D3 lands; see docs/integration.md.
+ * Shortcuts use photo/selfie/manual/scan; video is still a valid deep link, and the parser is
+ * shared by both. See docs/integration.md.
  */
 enum class HoltzmanDestination(
     val host: String,
@@ -17,6 +18,7 @@ enum class HoltzmanDestination(
 ) {
     PHOTO("photo", CameraMode.CAMERA, CameraSelector.LENS_FACING_BACK),
     SELFIE("selfie", CameraMode.CAMERA, CameraSelector.LENS_FACING_FRONT),
+    MANUAL("manual", CameraMode.MANUAL, CameraSelector.LENS_FACING_BACK),
     SCAN("scan", CameraMode.QR_SCAN, CameraSelector.LENS_FACING_BACK),
     VIDEO("video", CameraMode.VIDEO, CameraSelector.LENS_FACING_BACK),
 }

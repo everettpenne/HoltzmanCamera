@@ -17,7 +17,7 @@ class HoltzmanShortcutsTest {
         HoltzmanShortcuts.publish(context)
 
         val shortcuts = context.getSystemService(ShortcutManager::class.java).dynamicShortcuts
-        assertEquals(setOf("photo", "selfie", "scan", "video"), shortcuts.map { it.id }.toSet())
+        assertEquals(setOf("photo", "selfie", "scan", "manual"), shortcuts.map { it.id }.toSet())
 
         shortcuts.forEach { shortcut ->
             val intent = shortcut.intent

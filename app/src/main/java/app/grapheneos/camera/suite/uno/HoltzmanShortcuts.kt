@@ -31,8 +31,8 @@ object HoltzmanShortcuts {
             R.string.shortcut_selfie, R.string.shortcut_selfie_long),
         Entry(HoltzmanDestination.SCAN, R.drawable.shortcut_scan,
             R.string.shortcut_scan, R.string.shortcut_scan_long),
-        Entry(HoltzmanDestination.VIDEO, R.drawable.shortcut_video,
-            R.string.shortcut_video, R.string.shortcut_video_long),
+        Entry(HoltzmanDestination.MANUAL, R.drawable.shortcut_manual,
+            R.string.shortcut_manual, R.string.shortcut_manual_long),
     )
 
     fun publish(context: Context) {

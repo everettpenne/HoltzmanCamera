@@ -11,6 +11,7 @@ class HoltzmanLinksTest {
         assertEquals(HoltzmanDestination.PHOTO, HoltzmanLinks.parse("holtzman://photo"))
         assertEquals(HoltzmanDestination.SELFIE, HoltzmanLinks.parse("holtzman://selfie"))
         assertEquals(HoltzmanDestination.SCAN, HoltzmanLinks.parse("holtzman://scan"))
+        assertEquals(HoltzmanDestination.MANUAL, HoltzmanLinks.parse("holtzman://manual"))
         assertEquals(HoltzmanDestination.VIDEO, HoltzmanLinks.parse("holtzman://video"))
     }
 
@@ -34,7 +35,7 @@ class HoltzmanLinksTest {
         assertNull(HoltzmanLinks.parse(null))
         assertNull(HoltzmanLinks.parse(""))
         assertNull(HoltzmanLinks.parse("https://photo"))
-        assertNull(HoltzmanLinks.parse("holtzman://manual"))
+        assertNull(HoltzmanLinks.parse("holtzman://unknown"))
         assertNull(HoltzmanLinks.parse("holtzman://photo/extra"))
         assertNull(HoltzmanLinks.parse("not a uri"))
     }

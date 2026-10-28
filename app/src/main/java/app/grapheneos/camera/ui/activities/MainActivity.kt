@@ -43,6 +43,7 @@ import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.SeekBar
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -55,6 +56,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.Camera
 import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.MeteringPointFactory
 import androidx.camera.core.SurfaceOrientedMeteringPointFactory
@@ -98,6 +100,8 @@ import app.grapheneos.camera.ui.showIgnoringShortEdgeMode
 import app.grapheneos.camera.util.CameraControl
 import app.grapheneos.camera.util.ImageResizer
 import app.grapheneos.camera.util.executeIfAlive
+import app.grapheneos.camera.suite.manual.ManualController
+import app.grapheneos.camera.suite.manual.ManualMath
 import app.grapheneos.camera.suite.uno.HoltzmanLinks
 import app.grapheneos.camera.suite.uno.HoltzmanShortcuts
 import app.grapheneos.camera.util.resolveActivity
@@ -780,6 +784,7 @@ open class MainActivity : AppCompatActivity(),
         gestureDetector = GestureDetector(this, this)
 
         camConfig = CamConfig(this)
+        manualController = ManualController()
         cameraControl = CameraControl(camConfig)
         mainOverlay = binding.mainOverlay
         imageCapturer = ImageCapturer(this)
@@ -1136,6 +1141,8 @@ open class MainActivity : AppCompatActivity(),
             }
         }
 
+        setupManualControls()
+
         HoltzmanShortcuts.publish(this)
 
         // A shortcut/deep link is applied before the first bind (onResume initializes the camera),
@@ -1149,6 +1156,154 @@ open class MainActivity : AppCompatActivity(),
         super.onNewIntent(intent)
         setIntent(intent)
         applyDestination(intent, initial = false)
+    }
+
+    fun setManualPanelVisible(visible: Boolean) {
+        binding.manualPanel.visibility = if (visible) View.VISIBLE else View.GONE
+        if (visible) {
+            if (manualController.isAttached) manualController.setEnabled(true)
+        } else {
+            manualController.clear()
+            manualUnavailable = false
+        }
+        updateManualPanel()
+    }
+
+    fun onCameraBound(camera: Camera) {
+        manualUnavailable = !manualController.attach(camera)
+        if (camConfig.isManualMode && !manualUnavailable) {
+            manualController.setEnabled(true)
+        }
+        updateManualPanel()
+    }
+
+    private fun setupManualControls() {
+        binding.manualAuto.setOnClickListener {
+            manualController.clear()
+            updateManualPanel()
+        }
+
+        binding.manualShutter.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (!fromUser || isSyncingManualUi) return
+                val range = manualController.ranges ?: return
+                manualController.updateExposure(
+                    ManualMath.progressToExposure(progress, range.exposureMinNs, range.exposureMaxNs)
+                )
+                updateManualPanel()
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+
+        binding.manualIso.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (!fromUser || isSyncingManualUi) return
+                val range = manualController.ranges ?: return
+                manualController.updateIso(
+                    ManualMath.progressToIso(progress, range.isoMin, range.isoMax)
+                )
+                updateManualPanel()
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+
+        binding.manualFocus.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (!fromUser || isSyncingManualUi) return
+                val range = manualController.ranges ?: return
+                manualController.updateFocus(
+                    ManualMath.progressToFocus(progress, range.focusMaxDiopters)
+                )
+                updateManualPanel()
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+
+        binding.manualWhiteBalance.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (!fromUser || isSyncingManualUi) return
+                val range = manualController.ranges ?: return
+                manualController.updateWhiteBalance(
+                    ManualMath.progressToWhiteBalance(
+                        progress, range.whiteBalanceMinK, range.whiteBalanceMaxK
+                    )
+                )
+                updateManualPanel()
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+
+        updateManualPanel()
+    }
+
+    private fun updateManualPanel() {
+        val inManual = camConfig.isManualMode
+        binding.manualPanel.visibility = if (inManual) View.VISIBLE else View.GONE
+        if (!inManual) return
+
+        val range = manualController.ranges
+        val state = manualController.state
+        val available = manualController.isAttached && range != null && state != null
+
+        binding.manualStatus.visibility = View.VISIBLE
+        binding.manualStatus.text = when {
+            !available && manualUnavailable -> getString(R.string.manual_unavailable)
+            !available -> getString(R.string.manual_waiting)
+            state.enabled -> ""
+            else -> getString(R.string.manual_auto)
+        }
+
+        val bars = arrayOf(
+            binding.manualShutter,
+            binding.manualIso,
+            binding.manualFocus,
+            binding.manualWhiteBalance,
+        )
+        bars.forEach { it.isEnabled = available }
+
+        if (!available) {
+            binding.manualShutterValue.text = "—"
+            binding.manualIsoValue.text = "—"
+            binding.manualFocusValue.text = "—"
+            binding.manualWhiteBalanceValue.text = "—"
+            return
+        }
+
+        val ranges = range
+        val current = state
+
+        isSyncingManualUi = true
+        binding.manualShutter.progress = ManualMath.exposureToProgress(
+            current.exposureNs, ranges.exposureMinNs, ranges.exposureMaxNs
+        )
+        binding.manualIso.progress = ManualMath.isoToProgress(
+            current.iso, ranges.isoMin, ranges.isoMax
+        )
+        binding.manualFocus.progress = ManualMath.focusToProgress(
+            current.focusDiopters, ranges.focusMaxDiopters
+        )
+        binding.manualWhiteBalance.progress = ManualMath.whiteBalanceToProgress(
+            current.whiteBalanceK, ranges.whiteBalanceMinK, ranges.whiteBalanceMaxK
+        )
+
+        binding.manualShutterValue.text = ManualMath.exposureLabel(current.exposureNs)
+        binding.manualIsoValue.text = ManualMath.isoLabel(current.iso)
+        binding.manualFocusValue.text =
+            if (ranges.hasFocus) ManualMath.focusLabel(current.focusDiopters) else "—"
+        binding.manualWhiteBalanceValue.text =
+            if (ranges.whiteBalanceAvailable) ManualMath.whiteBalanceLabel(current.whiteBalanceK) else "—"
+
+        binding.manualFocus.isEnabled = ranges.hasFocus
+        binding.manualWhiteBalance.isEnabled = ranges.whiteBalanceAvailable
+        isSyncingManualUi = false
     }
 
     private fun applyDestination(intent: Intent?, initial: Boolean) {
@@ -1553,6 +1708,10 @@ open class MainActivity : AppCompatActivity(),
     }
 
     lateinit var camConfig: CamConfig
+
+    private lateinit var manualController: ManualController
+    private var manualUnavailable = false
+    private var isSyncingManualUi = false
     private lateinit var cameraControl: CameraControl
 
     companion object {

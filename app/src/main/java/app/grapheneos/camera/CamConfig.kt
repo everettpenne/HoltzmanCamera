@@ -81,6 +81,7 @@ enum class CameraMode(val extensionMode: Int, val uiName: Int) {
     NIGHT(ExtensionMode.NIGHT, R.string.night_mode),
     HDR(ExtensionMode.HDR, R.string.hdr_mode),
     CAMERA(ExtensionMode.NONE, R.string.camera),
+    MANUAL(ExtensionMode.NONE, R.string.manual),
     VIDEO(ExtensionMode.NONE, R.string.video),
 }
 
@@ -371,6 +372,9 @@ class CamConfig(private val mActivity: MainActivity) {
 
     var isQRMode = false
         private set
+
+    val isManualMode: Boolean
+        get() = currentMode == CameraMode.MANUAL
 
     val isFlashAvailable: Boolean
         get() = camera?.cameraInfo?.hasFlashUnit() ?: false
@@ -1665,6 +1669,8 @@ class CamConfig(private val mActivity: MainActivity) {
         }
 
         val captureMode = when {
+            // ZSL cannot combine with fixed exposure/AWB/AF; manual always uses a normal capture.
+            isManualMode -> ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
             waitForFocusLock -> ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
             enableZsl -> ImageCapture.CAPTURE_MODE_ZERO_SHUTTER_LAG
             else -> ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
@@ -1920,6 +1926,7 @@ class CamConfig(private val mActivity: MainActivity) {
                 mActivity, cameraSelector,
                 sessionConfig
             )
+            mActivity.onCameraBound(camera!!)
         } catch (exception: RuntimeException) {
             // A vendor extension can still fail to initialize at bind time even though the
             // pre-flight probe in isExtensionUsable() passed. When one was applied, record the
@@ -2059,7 +2066,7 @@ class CamConfig(private val mActivity: MainActivity) {
     private fun availableModes(): Set<CameraMode> {
         return CameraMode.entries.filter {
             when (it) {
-                CameraMode.CAMERA, CameraMode.VIDEO -> true
+                CameraMode.CAMERA, CameraMode.MANUAL, CameraMode.VIDEO -> true
                 CameraMode.QR_SCAN -> mActivity !is SecureMainActivity
                 else -> {
                     check(it.extensionMode != ExtensionMode.NONE)
@@ -2218,6 +2225,8 @@ class CamConfig(private val mActivity: MainActivity) {
         isVideoMode = mode == CameraMode.VIDEO
 
         applyModeChrome()
+
+        mActivity.setManualPanelVisible(isManualMode)
 
         mActivity.updateSelfTimerBadge()
     }
