@@ -6,6 +6,8 @@ A camera for the [Glass](https://github.com/everettpenne/Glass) suite, forked fr
 
 The fork keeps GrapheneOS Camera's camera core and adds the things the suite needs: manual controls, RAW/DNG, Ultra HDR, photographic styles, a one-tap handoff to Sietch, and the metadata and shortcuts that make it a first-class app in Uno Launcher.
 
+**Test build:** [Holtzman Camera 0.1.0-test](https://github.com/everettpenne/HoltzmanCamera/releases/tag/v0.1.0-test) — debug, installs beside GrapheneOS Camera.
+
 - [Project outline](PROJECT.md) — goals, deliverables, milestones, risks
 - [Architecture](docs/architecture.md) — structure, capture pipeline, data flow
 - [Ix engine](docs/ix.md) — what the imaging engine owns and why

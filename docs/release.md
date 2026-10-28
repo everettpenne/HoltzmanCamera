@@ -2,7 +2,7 @@
 
 Short answer:
 
-- **D1 is done**, and its debug build can go to GitHub now as `v0.1.0-test`. It installs as **Holtzman Camera d** (`com.everettpenne.holtzman.dev`), with the aperture icon, About page, Glass palette and the Ix JPEG hook.
+- **D1 is done**, and its debug build is published as [v0.1.0-test](https://github.com/everettpenne/HoltzmanCamera/releases/tag/v0.1.0-test). It installs as **Holtzman Camera d** (`com.everettpenne.holtzman.dev`), with the aperture icon, About page, Glass palette and the Ix JPEG hook.
 - **A public release still waits.** The build is debug-signed, the Ix hook is debug-only by design, and there is no privacy page or signed release pipeline yet.
 
 ## Readiness
