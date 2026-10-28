@@ -7,7 +7,7 @@ import org.junit.Test
 
 class HoltzmanLinksTest {
     @Test
-    fun parsesTheFourShortcutHosts() {
+    fun parsesTheShortcutAndLinkHosts() {
         assertEquals(HoltzmanDestination.PHOTO, HoltzmanLinks.parse("holtzman://photo"))
         assertEquals(HoltzmanDestination.SELFIE, HoltzmanLinks.parse("holtzman://selfie"))
         assertEquals(HoltzmanDestination.SCAN, HoltzmanLinks.parse("holtzman://scan"))

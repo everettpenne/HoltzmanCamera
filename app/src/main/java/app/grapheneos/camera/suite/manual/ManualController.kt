@@ -1,3 +1,5 @@
+@file:OptIn(androidx.camera.camera2.interop.ExperimentalCamera2Interop::class)
+
 package app.grapheneos.camera.suite.manual
 
 import android.hardware.camera2.CameraCharacteristics
@@ -5,6 +7,7 @@ import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.params.RggbChannelVector
 import android.util.Log
 import androidx.camera.camera2.interop.Camera2CameraControl
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.camera2.interop.CaptureRequestOptions
 import androidx.camera.core.Camera
@@ -15,6 +18,7 @@ import androidx.camera.core.Camera
  * The interop control is owned by the currently bound camera; [attach] is called after every
  * (re)bind, and [apply] is a no-op until it has succeeded. Everything is main-thread only.
  */
+@androidx.annotation.OptIn(markerClass = [ExperimentalCamera2Interop::class])
 class ManualController {
     private companion object {
         const val TAG = "ManualController"
